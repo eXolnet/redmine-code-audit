@@ -9,7 +9,7 @@ Redmine::Plugin.register :code_audit do
   author 'eXolnet'
   description 'This is allow developers to audit code from the repositories.'
   version '0.0.1'
-  url 'http://www.exolnet.com'
+  url 'https://redmine.exolnet.com/projects/redmine-code-audit'
   author_url 'http://www.exolnet.com'
   
   project_module :audits do
