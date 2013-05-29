@@ -1,0 +1,102 @@
+div.audit {
+	background: #ffffdd;
+	padding: 6px;
+	margin-bottom: 6px;
+	border: 1px solid #d7d7d7;
+}
+
+div.audit .attributes th {
+	width: 150px;
+}
+
+.audit-comment-overlay {
+	background: #ffeeaa;
+	border: 1px solid #ffcc00;
+	position: absolute;
+	opacity: 0.5;
+	top: 0px;
+	left: 0px;
+	box-sizing: border-box;
+}
+
+.line-comment {
+	background-color: #fdf8ea;
+	padding: 7px 15px 15px;
+}
+
+.line-comment textarea {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.line-comment .buttons {
+	text-align: right;
+	margin: 5px 0 0;
+}
+
+
+.audit_comment {
+	border-color: #eeeeee;
+	border-width: 1px 10px;
+	border-style: solid;
+	padding: 10px;
+	margin: 5px 0 15px;
+}
+
+.audit_comment h5 {
+	border-bottom: 1px solid #eee;
+	padding-bottom: 3px;
+	font-weight: normal;
+	text-transform: uppercase;
+	font-size: 9px;
+	margin-bottom: 5px;
+}
+
+.inline-comments-summary {
+	width: 100%;
+}
+
+.inline-comments-summary th {
+	text-align: left;
+	font-weight: normal;
+	font-style: italic;
+	font-size: 10px;
+}
+
+.inline-line-number {
+	width: 100px;
+}
+
+.inline-line-number a {
+	display: inline-block;
+	width: 70px;
+	padding: 3px 15px;
+}
+
+.inline-line-number a:hover, .inline-line-number a:active {
+	background-color: #ffffdd;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.list-audit-changes .text-center {
+	width: 75px;
+	padding-left: 10px;
+}
+
+.inline-comment {
+	background: #f9f9f1;
+	border: 1px solid #aaaa88;
+	padding: 8px 10px;
+}
+
+.inline-comment.inline-comment-draft {
+	background: #f1f1f1;
+	border: 1px dashed #666666;
+}
+
+.audit-buttons {
+	margin-left: 177px;
+}

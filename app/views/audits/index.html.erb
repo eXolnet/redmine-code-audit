@@ -1,0 +1,22 @@
+<h2>Audits de code</h2>
+
+<table class="list">
+  <thead><tr>
+  <th>Commit</th>
+  <th>Comitter</th>
+  <th>Comitted on</th>
+  <th>Last auditor</th>
+  <th>Status</th>
+  </tr></thead>
+  <tbody>
+<% for audit in @audits %>
+  <tr class="<%= cycle("odd", "even") %>">
+  <td><%= link_to_audit(audit) %></td>
+  <td><%= h truncate(audit.changeset.author.to_s, :length => 30) %></td>
+  <td><%= format_time(audit.changeset.committed_on) %></td>
+  <td>Auditor</td>
+  <td>Status</td>
+  </tr>
+<% end %>
+  </tbody>
+</table>

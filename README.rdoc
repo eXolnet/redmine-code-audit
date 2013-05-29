@@ -1,0 +1,26 @@
+= code_audit
+
+AUDIT
+	- id
+	- user_id
+	- changeset_id
+	- status
+	- created_on
+	- updated_on
+
+
+AUDIT_COMMENT
+	- id
+	- audit_id
+	- user_id
+	- created_on
+	- updated_on
+	- action
+	- content
+
+AUDIT_COMMENT_INLINE
+	- id
+	- comment_id
+	- change_id
+	- line_number
+	- content
