@@ -22,7 +22,7 @@
 				<tr class="<%= cycle("odd", "even") %>">
 					<td class="revision"><%= link_to_revision(audit.changeset, audit.changeset.repository) %></td>
 					<td class="subject"><%= link_to_audit(audit) %></td>
-					<td class="commiter"><%= h truncate(audit.changeset.author, :length => 30) %></td>
+					<td class="commiter"><%= h audit.changeset.author %></td>
 					<td class="commited_on"><%= format_time(audit.changeset.committed_on) %></td>
 					<td class="submitter"><%= link_to_user(audit.user) %></td>
 					<td class="updated_on"><%= format_time(audit.updated_on) %></td>
