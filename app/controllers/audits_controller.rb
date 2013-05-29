@@ -55,7 +55,7 @@ class AuditsController < ApplicationController
   	
   	# Save comment
   	@comment = AuditComment.new(params[:audit])
-  	@comment.audit_id = @audit
+  	@comment.audit = @audit
   	@comment.user = User.current
   	@audit.comments << @comment
   	
