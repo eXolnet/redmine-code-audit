@@ -148,11 +148,22 @@ $(document).ready(function() {
 				overlay.remove();
 				td.empty();
 				
+				// On ne permet pas l'ajout de commentaires vides
+				if (comment == "") {
+					return;
+				}
+				
 				var line_begin = comment_line_begin.prev().text(),
 					line_end   = comment_line_end.prev().text(),
 					change_id  = AuditHelper.change_id(row.closest('table'));
 				
-				td.append('<div class="inline-comment inline-comment-draft" data-line-begin="' + line_begin + '" data-line-end="' + line_end + '">' + comment + '</div>');
+				td.append('<div class="inline-comment inline-comment-draft" data-line-begin="' + line_begin + '" data-line-end="' + line_end + '">' +
+						'<div class="inline-comment-header">' +
+							'<span class="inline-comment-author">' + $('#comment_user_name').val() + ' (Draft)</span>' +
+							'<span class="inline-comment-line">Line ' + line_begin + (line_begin != line_end ? '-'+line_end : '') + '</span>' +
+						'</div>' +
+						comment +
+					'</div>');
 				
 				td.append('<input type="hidden" name="inline_comment[' + comment_index + '][line_begin]" value="' + line_begin + '" />');
 				td.append('<input type="hidden" name="inline_comment[' + comment_index + '][line_end]" value="' + line_end + '" />');
@@ -209,6 +220,7 @@ $(document).ready(function() {
 	$('.inline-summary-content').each(function() {
 		var $this = $(this),
 			path = $this.attr('data-path'),
+			audit_comment = $this.parents('.audit_comment'),
 			line_begin = $this.attr('data-line-begin'),
 			line_end = $this.attr('data-line-end') != "" ? $this.attr('data-line-end') : line_begin;
 			
@@ -217,7 +229,13 @@ $(document).ready(function() {
 		var tr = $('<tr><th class="line-num" /><td class="line-comment" /><th class="line-num" /><td class="line-comment" /></tr>'),
 			td = tr.find('td:nth-child(4)');
 		
-		td.append('<div class="inline-comment" data-line-begin="' + line_begin + '" data-line-end="' + line_end + '">' + $this.html() + '</div>');
+		td.append('<div class="inline-comment" data-line-begin="' + line_begin + '" data-line-end="' + line_end + '">' +
+						'<div class="inline-comment-header">' +
+							'<span class="inline-comment-author">' + audit_comment.find('.author').html() + '</span>' +
+							'<span class="inline-comment-line">Line ' + line_begin + (line_begin != line_end ? '-'+line_end : '') + '</span>' +
+						'</div>' +
+						$this.html() +
+					'</div>');
 		
 		$row.after(tr);
 	});

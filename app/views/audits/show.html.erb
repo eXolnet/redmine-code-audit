@@ -2,13 +2,27 @@
 	<h2>Audit #<%= @audit.id %></h2>
 	
 	<div class="audit">
-		<h3>Revision <%= @changeset.revision %></h3>
+		<h3><%= @audit.summary %></h3>
 	
 		<table class="attributes">
 			<tbody>
+				<!--
 				<tr>
 					<th>Statut:</th>
 					<td>Concern Raised</td>
+				</tr>
+				-->
+				<tr>
+					<th>Submitted on:</th>
+					<td><%= format_time(@audit.created_on) %></td>
+				</tr>
+				<tr>
+					<th>Submitter:</th>
+					<td><%= link_to_user(@audit.user) %></td>
+				</tr>
+				<tr>
+					<th>Revision:</th>
+					<td><%= link_to_revision(@audit.changeset, @repository) %></td>
 				</tr>
 				<tr>
 					<th>Commited on:</th>
@@ -18,10 +32,28 @@
 					<th>Committer:</th>
 					<td><%= h truncate(@changeset.author.to_s, :length => 30) %></td>
 				</tr>
+				<% if @changeset.parents.present? %>
 				<tr>
 					<th>Parents:</th>
-					<td>rBH7ba7ee78584f: Fix #1976 Correction d'une faute d'ortographe</td>
+					<td>
+						<%= @changeset.parents.collect{
+				              |p| link_to_revision(p, @repository, :text => format_revision(p))
+				            }.join(", ").html_safe %>
+				    </td>
 				</tr>
+				<% end %>
+				<% if @changeset.children.present? %>
+				<tr>
+					<th>Children:</th>
+					<td>
+						<%= @changeset.children.collect{
+				              |p| link_to_revision(p, @repository, :text => format_revision(p))
+				             }.join(", ").html_safe %>
+					</td>
+				</tr>
+				<% end %>
+				
+				<!--
 				<tr>
 					<th>Branches:</th>
 					<td>develop, feature-Account-Nodification, feature-correction-comptes, feature/customers-mvp</td>
@@ -30,17 +62,31 @@
 					<th>Tags:</th>
 					<td>None</td>
 				</tr>
+				-->
 			</tbody>
 		</table>
 		
-		<hr />
-		
-		<div class="description">
-			<p><strong>Description</strong></p>
-			<div class="wiki">
-				<p><%= @changeset.comments %></p>
+		<% if ( ! @audit.details.nil?) %>
+			<hr />
+			
+			<div class="description">
+				<p><strong>Details</strong></p>
+				<div class="wiki">
+					<p><%= @audit.details %></p>
+				</div>
 			</div>
-		</div>
+		<% end %>
+		
+		<% if ( ! @changeset.comments.nil?) %>
+			<hr />
+			
+			<div class="comment">
+				<p><strong>Revision comment</strong></p>
+				<div class="wiki">
+					<p><%= @changeset.comments %></p>
+				</div>
+			</div>
+		<% end; %>
 	</div>
 	
 	<br />
@@ -49,7 +95,7 @@
 		<h3>Audits (<%= @comments.count.to_s %>)</h3>
 		<% for comment in @comments %>
 			<div class="audit_comment">
-				<h4><%= link_to_user(comment.user) %> review this commit</h4>
+				<h4><span class="author"><%= link_to_user(comment.user) %></span> review this commit</h4>
 				<div class="wiki">
 					<%= textilizable comment.content %>
 				</div>
@@ -105,7 +151,11 @@
 								Added
 							<% elsif change.action == 'M' %>
 								Modified
-							<% else %>
+							<% elsif change.action == 'C' %>
+								Copied
+							<% elsif change.action == 'R' %>
+								Renamed
+							<% elsif change.action == 'D' %>
 								Deleted
 							<% end %>
 						</a>
@@ -137,6 +187,7 @@
 	</p>
 <% end %>
 
+<%= hidden_field_tag 'comment_user_name', User.current.to_s, :id => 'comment_user_name' %>
 
 <% content_for :header_tags do %>
 	<%= stylesheet_link_tag "scm" %>

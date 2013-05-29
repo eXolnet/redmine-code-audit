@@ -1,22 +1,40 @@
+<div class="contextual">
+<%= link_to 'Nouvel audit', new_project_audit_path, :class => 'icon icon-add' %>
+</div>
+
 <h2>Audits de code</h2>
 
-<table class="list">
-  <thead><tr>
-  <th>Commit</th>
-  <th>Comitter</th>
-  <th>Comitted on</th>
-  <th>Last auditor</th>
-  <th>Status</th>
-  </tr></thead>
-  <tbody>
-<% for audit in @audits %>
-  <tr class="<%= cycle("odd", "even") %>">
-  <td><%= link_to_audit(audit) %></td>
-  <td><%= h truncate(audit.changeset.author.to_s, :length => 30) %></td>
-  <td><%= format_time(audit.changeset.committed_on) %></td>
-  <td>Auditor</td>
-  <td>Status</td>
-  </tr>
+<% if ( ! @audits.empty?) %>
+	<table class="list list-audits">
+		<thead>
+			<tr>
+				<th>Revision</th>
+				<th>Summary</th>
+				<th>Comitter</th>
+				<th>Comitted on</th>
+				<th>Submitter</th>
+				<th>Updated On</th>
+			</tr>
+		</thead>
+		
+		<tbody>
+			<% for audit in @audits %>
+				<tr class="<%= cycle("odd", "even") %>">
+					<td class="revision"><%= link_to_revision(audit.changeset, audit.changeset.repository) %></td>
+					<td class="subject"><%= link_to_audit(audit) %></td>
+					<td class="commiter"><%= h truncate(audit.changeset.author, :length => 30) %></td>
+					<td class="commited_on"><%= format_time(audit.changeset.committed_on) %></td>
+					<td class="submitter"><%= link_to_user(audit.user) %></td>
+					<td class="updated_on"><%= format_time(audit.updated_on) %></td>
+				</tr>
+			<% end %>
+		</tbody>
+	</table>
+<% else %>
+	<p class="nodata"><%= l(:label_no_data) %></p>
 <% end %>
-  </tbody>
-</table>
+
+<% content_for :header_tags do %>
+	<%= stylesheet_link_tag 'audit', :plugin => 'code_audit' %>
+	<%= javascript_include_tag 'audit', :plugin => 'code_audit' %>
+<% end %>

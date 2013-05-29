@@ -6,13 +6,27 @@ class AuditsController < ApplicationController
 
   def index
   	@project = Project.find(params[:project_id])
-  	@audits = Audit.all
+  	@audits = Audit.order("#{Audit.table_name}.updated_on DESC").all
   end
   
   def new
+  	@project = Project.find(params[:project_id])
   end
   
   def create
+  	@project = Project.find(params[:project_id])
+  	
+  	revision = params[:revision]
+
+  	@audit = Audit.new(params[:audit])
+  	@audit.user = User.current
+  	@audit.changeset = @project.repository.changesets.where("#{Changeset.table_name}.revision LIKE ?", "%#{revision}%").first
+  	
+    if @audit.save
+      flash[:notice] = 'The audit was succesfully created.'
+      redirect_to project_audit_path(@project, @audit)
+      return
+    end
   end
   
   def show
@@ -75,6 +89,22 @@ class AuditsController < ApplicationController
   end
   
   def delete
-  	redirect_to audits_path
+  	@project = Project.find(params[:project_id])
+  	redirect_to project_audits_path(@project)
+  end
+  
+  def changesets
+  	@project = Project.find(params[:project_id])
+  
+    @changesets = []
+    q = (params[:q] || params[:term]).to_s.strip
+    if q.present?
+      @changesets += @project.repository.changesets.where("#{Changeset.table_name}.revision LIKE ?", "%#{q}%").order("#{Changeset.table_name}.committed_on DESC").limit(10).all
+      @changesets.compact!
+    end
+    
+    render :layout => false
+  rescue ActiveRecord::RecordNotFound
+    render_404
   end
 end

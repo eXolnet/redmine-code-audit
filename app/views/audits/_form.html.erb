@@ -1,0 +1,17 @@
+<p>
+	<label for="audit_revision">Revision<span class="required"> *</span></label>
+	<input type="text" id="audit_revision" name="revision" />
+</p>
+
+<p>
+	<label for="audit_summary">Summary<span class="required"> *</span></label>
+	<input type="text" id="audit_summary" name="audit[summary]" maxlength="255" />
+</p>
+
+<p>
+	<label for="audit_details">Details</label>
+	<textarea class="wiki-edit" cols="60" id="audit_details" name="audit[details]" rows="8"></textarea>
+</p>
+<%= wikitoolbar_for 'audit_details' %>
+
+<%= javascript_tag "observeAutocompleteField('audit_revision', '#{escape_javascript auto_complete_changesets_path(:project_id => @project)}')" %>
