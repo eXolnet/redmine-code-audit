@@ -1,3 +1,7 @@
+<div class="contextual">
+	<%= delete_link project_audit_path(@project, @audit) %>
+</div>
+
 <%= form_tag({:action => 'update'}) do %>
 	<h2>Audit #<%= @audit.id %></h2>
 	

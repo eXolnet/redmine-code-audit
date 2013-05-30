@@ -89,8 +89,11 @@ class AuditsController < ApplicationController
     #render :action => 'show'
   end
   
-  def delete
+  def destroy
   	@project = Project.find(params[:project_id])
+  	@audit = Audit.find(params[:id])
+  	@audit.destroy
+  	
   	redirect_to project_audits_path(@project)
   end
   

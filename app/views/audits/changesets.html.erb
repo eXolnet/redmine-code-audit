@@ -1,6 +1,6 @@
 <%= raw @changesets.map {|changeset| {
       'id' => changeset.id,
-      'label' => "r#{changeset.revision}: #{truncate changeset.comments.to_s, :length => 60}",
+      'label' => "#{changeset.revision}: #{truncate changeset.comments.to_s, :length => 60}",
       'value' => changeset.revision
       }
     }.to_json
