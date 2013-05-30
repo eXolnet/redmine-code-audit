@@ -66,7 +66,7 @@
 			</tbody>
 		</table>
 		
-		<% if ( ! @audit.details.nil?) %>
+		<% if (@audit.details?) %>
 			<hr />
 			
 			<div class="description">
@@ -77,7 +77,7 @@
 			</div>
 		<% end %>
 		
-		<% if ( ! @changeset.comments.nil?) %>
+		<% if (@changeset.comments?) %>
 			<hr />
 			
 			<div class="comment">
