@@ -3,6 +3,7 @@ require 'redmine'
 # Patch the Redmine core
 require 'application_helper_patch'
 require 'project_patch'
+require 'changeset_patch'
 
 
 Redmine::Plugin.register :code_audit do
