@@ -1,6 +1,7 @@
 class CreateAudits < ActiveRecord::Migration
   def change
     create_table :audits do |t|
+      t.integer  :project_id,        :null => false
       t.integer  :user_id,           :null => false
       t.integer  :changeset_id,      :null => false
       t.string   :summary,           :null => false

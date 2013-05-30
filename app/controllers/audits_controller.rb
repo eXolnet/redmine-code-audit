@@ -6,7 +6,7 @@ class AuditsController < ApplicationController
 
   def index
   	@project = Project.find(params[:project_id])
-  	@audits = Audit.order("#{Audit.table_name}.updated_on DESC").all
+  	@audits = @project.audits.order("#{Audit.table_name}.updated_on DESC").all
   end
   
   def new
@@ -19,6 +19,7 @@ class AuditsController < ApplicationController
   	revision = params[:revision]
 
   	@audit = Audit.new(params[:audit])
+  	@audit.project = @project
   	@audit.user = User.current
   	@audit.changeset = @project.repository.changesets.where("#{Changeset.table_name}.revision LIKE ?", "%#{revision}%").first
   	
