@@ -22,6 +22,7 @@ class AuditsController < ApplicationController
   
   def new
   	@project = Project.find(params[:project_id])
+  	@audit ||= Audit.new(params[:audit])
   end
   
   def create
@@ -61,7 +62,7 @@ class AuditsController < ApplicationController
 	@diff_format_revisions = @repository.diff_format_revisions(@changeset, nil)
   end
   
-  def update
+  def comment
   	@project = Project.find(params[:project_id])
   	@audit = Audit.find(params[:id])
   	
@@ -98,6 +99,25 @@ class AuditsController < ApplicationController
     
     #show
     #render :action => 'show'
+  end
+  
+  def edit
+  	@project = Project.find(params[:project_id])
+  	@audit = Audit.find(params[:id])
+  end
+  
+  def update
+  	@project = Project.find(params[:project_id])
+  	@audit = Audit.find(params[:id])
+  	
+    if @audit.update_attributes(params[:audit])
+      flash[:notice] = l(:notice_successful_update)
+      redirect_to project_audit_path(@project, @audit)
+      return
+    end
+    
+    edit
+    render :action => 'edit'
   end
   
   def destroy

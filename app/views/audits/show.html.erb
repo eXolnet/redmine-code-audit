@@ -1,8 +1,9 @@
 <div class="contextual">
+	<%= link_to l(:button_update), edit_project_audit_path(@project, @audit), :class => 'icon icon-edit', :accesskey => accesskey(:edit) %>
 	<%= delete_link project_audit_path(@project, @audit) %>
 </div>
 
-<%= form_tag({:action => 'update'}) do %>
+<%= form_tag({:action => 'comment'}) do %>
 	<h2>Audit #<%= @audit.id %></h2>
 	
 	<div class="audit">
