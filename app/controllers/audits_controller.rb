@@ -11,7 +11,7 @@ class AuditsController < ApplicationController
   	@limit = per_page_option
   	@audit_count = @query.count
     @audit_pages = Paginator.new self, @audit_count, @limit, params['page']
-    @offset ||= @audit_pages.offset
+    @offset ||= @audit_pages.current.offset
   	
   	@audits = @query
   		.order("#{Audit.table_name}.updated_on DESC")
