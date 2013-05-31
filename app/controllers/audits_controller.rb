@@ -10,7 +10,7 @@ class AuditsController < ApplicationController
   	
   	@limit = per_page_option
   	@audit_count = @query.count
-    @audit_pages = Paginator.new @audit_count, @limit, params['page']
+    @audit_pages = Paginator.new self, @audit_count, @limit, params['page']
     @offset ||= @audit_pages.offset
   	
   	@audits = @query
