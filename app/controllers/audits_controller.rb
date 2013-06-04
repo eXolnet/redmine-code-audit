@@ -3,6 +3,8 @@ class AuditsController < ApplicationController
 
   helper :repositories
   include RepositoriesHelper
+  helper :watchers
+  include WatchersHelper
 
   def index
   	@project = Project.find(params[:project_id])
@@ -23,6 +25,8 @@ class AuditsController < ApplicationController
   def new
   	@project = Project.find(params[:project_id])
   	@audit ||= Audit.new(params[:audit])
+  	@available_auditors = @project.users.sort
+  	#@available_watchers = @project.users.sort
   end
   
   def create
@@ -36,7 +40,13 @@ class AuditsController < ApplicationController
   	@audit.changeset = @project.repository.changesets.where("#{Changeset.table_name}.revision LIKE ?", "%#{revision}%").first
   	
     if @audit.save
-      flash[:notice] = 'The audit was succesfully created.'
+    	unless params[:auditors_user_ids].nil?
+    	  	params[:auditors_user_ids].each do |value|
+			  	@audit.add_auditor(User.find(value))
+    	  	end
+    	end
+    
+      flash[:notice] = l(:notice_audit_successful_create, :id => view_context.link_to("##{@audit.id}", project_audit_path(@project, @audit)))
       redirect_to project_audit_path(@project, @audit)
       return
     end
@@ -104,6 +114,7 @@ class AuditsController < ApplicationController
   def edit
   	@project = Project.find(params[:project_id])
   	@audit = Audit.find(params[:id])
+  	@available_auditors = @project.users.sort
   end
   
   def update

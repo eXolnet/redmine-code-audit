@@ -1,19 +1,19 @@
 <div class="contextual">
-<%= link_to 'Nouvel audit', new_project_audit_path, :class => 'icon icon-add' %>
+<%= link_to l(:label_audit_new), new_project_audit_path, :class => 'icon icon-add' %>
 </div>
 
-<h2>Audits</h2>
+<h2><%= l(:label_audits) %></h2>
 
 <% if ( ! @audits.empty?) %>
 	<table class="list list-audits">
 		<thead>
 			<tr>
-				<th>Revision</th>
-				<th>Summary</th>
-				<th>Comitter</th>
-				<th>Comitted on</th>
-				<th>Submitter</th>
-				<th>Updated On</th>
+				<th><%= l(:label_revision) %></th>
+				<th><%= l(:label_summary) %></th>
+				<th><%= l(:label_commiter) %></th>
+				<th><%= l(:label_commited_on) %></th>
+				<th><%= l(:label_submitter) %></th>
+				<th><%= l(:label_updated_on) %></th>
 			</tr>
 		</thead>
 		

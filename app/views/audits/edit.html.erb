@@ -1,5 +1,5 @@
 <h2>
-	<%= link_to_audit(@audit, :text => 'Audit #' + @audit.id.to_s) %> » Mise à jour
+	<%= link_to_audit(@audit, :text => l(:label_audit) + ' #' + @audit.id.to_s) %> » <%= l(:label_update_audit) %>
 </h2>
 
 <%= form_tag(edit_project_audit_path(@project, @audit), {:id => 'audit-form'}) do %>

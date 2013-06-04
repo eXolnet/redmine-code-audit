@@ -1,3 +1,27 @@
 # English strings go here for Rails i18n
 en:
   field_details: Details
+  label_auditors: Auditors
+  label_update_audit: Update audit
+  label_audit: Audit
+  label_summary: Summary
+  label_commiter: Commiter
+  label_commited_on: Commited on
+  label_submitter: Submitter
+  label_submitted_on: Submitted on
+  label_updated_on: Updated on
+  label_audit_new: New Audit
+  label_audits: Audits
+  label_revision_comment: Revision comment
+  label_inline_comments: Inline Comments
+  label_change: Change
+  label_path: Path
+  label_change_added: Added
+  label_change_modified: Modified
+  label_change_copied: Copied
+  label_change_renamed: Renamed
+  label_change_deleted: Deleted
+  label_change_detailed: Detailed changes
+  label_audit_commit: Audit commit
+  label_comment_general: General comment
+  notice_audit_successful_create: "Audit %{id} created."

@@ -13,4 +13,22 @@
     <%= wikitoolbar_for 'audit_details' %>
 </p>
 
+
+<p id="auditors_form">
+	<label><%=l(:label_auditors)%></label>
+	<span id="auditors_inputs">
+		<%=
+		
+		@available_auditors.map do |user|
+			# c = checked.nil? ? object.watched_by?(user) : checked (remplace le false)
+			tag = check_box_tag 'auditors_user_ids[]', user.id, nil, :id => nil
+			content_tag 'label', "#{tag} #{h(user)}".html_safe,
+			            :id => "audit_auditors_user_ids_#{user.id}",
+			            :class => "floating"
+		end.join.html_safe
+		
+		%>
+	</span>
+</p>
+
 <%= javascript_tag "observeAutocompleteField('audit_revision', '#{escape_javascript auto_complete_changesets_path(:project_id => @project)}')" %>
