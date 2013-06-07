@@ -19,14 +19,16 @@ class Changeset
 
     referenced_auditors.uniq!
     
+    @audit = Audit.new()
+    @audit.project = self.repository.project
+    @audit.user = self.user
+    @audit.changeset = self
+    @audit.summary = self.short_comments
+    
+    @audit.save
+    
     unless referenced_auditors.empty?
-  	  @audit = Audit.new()
-  	  @audit.project = self.repository.project
-  	  @audit.user = self.user
-  	  @audit.changeset = self
-  	  @audit.summary = self.short_comments
-  	  
-  	  @audit.save
+		# TODO: Save referenced auditors
     end
   end
 end
