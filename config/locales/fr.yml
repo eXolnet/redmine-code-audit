@@ -1,6 +1,6 @@
 # French strings go here for Rails i18n
 fr:
-  permission_view_autids: Voir les audits
+  permission_view_audits: Voir les audits
   field_details: Détails
   label_auditors: Auditeurs
   label_update_audit: Modifier l'audit

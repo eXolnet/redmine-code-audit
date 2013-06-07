@@ -24,7 +24,7 @@ Redmine::Plugin.register :code_audit do
   author_url 'http://www.exolnet.com'
   
   project_module :audits do
-    permission :view_polls, { :audits => [:index] }
+    permission :view_audits, { :audits => [:index] }
   end
 
   menu :project_menu, :audits, { :controller => 'audits', :action => 'index' }, :caption => 'Audits', :before => :settings, :param => :project_id
