@@ -1,3 +1,0 @@
-= Code Audit
-
-Code Audit is a Redmine plugin that allow user to post audit on commits for the repositories links to a project.
