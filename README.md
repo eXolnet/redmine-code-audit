@@ -2,7 +2,7 @@
 
 Code Audit is a Redmine plugin that allows users to post audits on commits in repositories linked to projects.
 
-== Installation
+## Installation
 
 1. Follow the Redmine plugin installation steps at: http://www.redmine.org/wiki/redmine/Plugins Make sure the plugin is installed to +vendor/plugins/redmine_code_audit+
 2. Restart your Redmine web servers (e.g. mongrel, thin, mod_rails)
