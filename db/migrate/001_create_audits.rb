@@ -9,7 +9,7 @@ class CreateAudits < ActiveRecord::Migration
       t.datetime :created_on,        :null => false
       t.datetime :updated_on,        :null => false
     end
-    
+
     create_table :audit_comments do |t|
       t.integer  :audit_id,          :null => false
       t.integer  :user_id,           :null => false
@@ -17,7 +17,7 @@ class CreateAudits < ActiveRecord::Migration
       t.datetime :created_on,        :null => false
       t.datetime :updated_on,        :null => false
     end
-    
+
     create_table :audit_comment_inlines do |t|
       t.integer  :audit_comment_id,  :null => false
       t.integer  :change_id,         :null => false
