@@ -1,5 +1,11 @@
-<%= form_tag({:action => 'update'}) do %>
-	<h2>Audit #<%= @audit.id %></h2>
+<div class="contextual">
+	<%= link_to l(:button_update), edit_project_audit_path(@project, @audit), :class => 'icon icon-edit', :accesskey => accesskey(:edit) %>
+	<%= watcher_link(@audit, User.current) %>
+	<%= delete_link project_audit_path(@project, @audit) %>
+</div>
+
+<%= form_tag({:action => 'comment'}) do %>
+	<h2><%= l(:label_audit) + ' #' + @audit.id.to_s %></h2>
 	
 	<div class="audit">
 		<h3><%= @audit.summary %></h3>
@@ -13,28 +19,42 @@
 				</tr>
 				-->
 				<tr>
-					<th>Submitted on:</th>
+					<th><%= l(:label_submitted_on) %>:</th>
 					<td><%= format_time(@audit.created_on) %></td>
 				</tr>
 				<tr>
-					<th>Submitter:</th>
+					<th><%= l(:label_submitter) %>:</th>
 					<td><%= link_to_user(@audit.user) %></td>
 				</tr>
+				<% unless @audit.auditor_users.empty? %>
+					<tr>
+						<th><%= l(:label_auditors) %>:</th>
+						<td>
+							<%=
+							
+							@audit.auditor_users.map do |user|
+								link_to_user(user).html_safe
+							end.join(', ').html_safe
+							
+							%>
+						</td>
+					</tr>
+				<% end %>
 				<tr>
-					<th>Revision:</th>
+					<th><%= l(:label_revision) %>:</th>
 					<td><%= link_to_revision(@audit.changeset, @repository) %></td>
 				</tr>
 				<tr>
-					<th>Commited on:</th>
+					<th><%= l(:label_commited_on) %>:</th>
 					<td><%= format_time(@changeset.committed_on) %></td>
 				</tr>
 				<tr>
-					<th>Committer:</th>
+					<th><%= l(:label_commiter) %>:</th>
 					<td><%= h truncate(@changeset.author.to_s, :length => 30) %></td>
 				</tr>
 				<% if @changeset.parents.present? %>
 				<tr>
-					<th>Parents:</th>
+					<th><%= l(:label_parent_revision) %>:</th>
 					<td>
 						<%= @changeset.parents.collect{
 				              |p| link_to_revision(p, @repository, :text => format_revision(p))
@@ -44,7 +64,7 @@
 				<% end %>
 				<% if @changeset.children.present? %>
 				<tr>
-					<th>Children:</th>
+					<th><%= l(:label_child_revision) %>:</th>
 					<td>
 						<%= @changeset.children.collect{
 				              |p| link_to_revision(p, @repository, :text => format_revision(p))
@@ -66,33 +86,33 @@
 			</tbody>
 		</table>
 		
-		<% if ( ! @audit.details.nil?) %>
-			<hr />
-			
-			<div class="description">
-				<p><strong>Details</strong></p>
-				<div class="wiki">
-					<p><%= @audit.details %></p>
-				</div>
-			</div>
-		<% end %>
-		
-		<% if ( ! @changeset.comments.nil?) %>
+		<% if (@changeset.comments?) %>
 			<hr />
 			
 			<div class="comment">
-				<p><strong>Revision comment</strong></p>
+				<p><strong><%= l(:label_revision_comment) %></strong></p>
 				<div class="wiki">
 					<p><%= @changeset.comments %></p>
 				</div>
 			</div>
 		<% end; %>
+		
+		<% if (@audit.details?) %>
+			<hr />
+			
+			<div class="description">
+				<p><strong><%= l(:label_details) %></strong></p>
+				<div class="wiki">
+					<p><%= @audit.details %></p>
+				</div>
+			</div>
+		<% end %>
 	</div>
 	
 	<br />
 	
 	<% if ! @comments.empty? %>
-		<h3>Audits (<%= @comments.count.to_s %>)</h3>
+		<h3><%= l(:label_audits) %> (<%= @comments.count.to_s %>)</h3>
 		<% for comment in @comments %>
 			<div class="audit_comment">
 				<h4><span class="author"><%= link_to_user(comment.user) %></span> reviewed this commit</h4>
@@ -101,7 +121,7 @@
 				</div>
 				
 				<% if ! comment.inline_comments.empty? %>
-					<h5>Inline Comments</h5>
+					<h5><%= l(:label_inline_comments) %></h5>
 					
 					<table class="inline-comments-summary">
 						<% current_path = nil %>
@@ -130,14 +150,14 @@
 		<br />
 	<% end %>
 	
-	<h3>Changes (<%= @filechanges.count.to_s %>)</h3>
+	<h3><%= l(:label_change_plural) %> (<%= @filechanges.count.to_s %>)</h3>
 	<table class="list list-audit-changes">
 		<thead>
 			<tr>
 				<th><%= l(:label_history) %></th>
 				<th><%= l(:button_view) %></th>
-				<th>Change</th>
-				<th>Path</th>
+				<th><%= l(:label_change) %></th>
+				<th><%= l(:label_path) %></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -148,15 +168,15 @@
 					<td class="text-center">
 						<a href="#change" class="audit-change">
 							<% if change.action == 'A' %>
-								Added
+								<%= l(:label_change_added) %>
 							<% elsif change.action == 'M' %>
-								Modified
+								<%= l(:label_change_modified) %>
 							<% elsif change.action == 'C' %>
-								Copied
+								<%= l(:label_change_copied) %>
 							<% elsif change.action == 'R' %>
-								Renamed
+								<%= l(:label_change_renamed) %>
 							<% elsif change.action == 'D' %>
-								Deleted
+								<%= l(:label_change_deleted) %>
 							<% end %>
 						</a>
 					</td>
@@ -168,15 +188,15 @@
 	
 	<br />
 	
-	<h3>Detailed changes</h3>
+	<h3><%= l(:label_change_detailed) %></h3>
 	<%= render :partial => 'common/diff', :locals => {:diff => @diff, :diff_type => @diff_type, :diff_style => @repository.class.scm_name} %>
 	
 	<br />
 	
-	<h3>Audit commit</h3>
+	<h3><%= l(:label_audit_commit) %></h3>
 	<div class="tabular">
 		<p>
-			<label for="audit_comment">General comment:</label>
+			<label for="audit_comment"><%= l(:label_comment_general) %>:</label>
 			<textarea class="wiki-edit" cols="60" id="audit_comment" name="audit[content]" rows="8"></textarea>
 		</p>
 		<%= wikitoolbar_for 'audit_comment' %>

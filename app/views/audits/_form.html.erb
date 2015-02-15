@@ -1,17 +1,34 @@
 <p>
-	<label for="audit_revision">Revision<span class="required"> *</span></label>
-	<input type="text" id="audit_revision" name="revision" />
+	<%= f.text_field :summary, :size => 80, :maxlength => 255, :required => true %>
 </p>
 
 <p>
-	<label for="audit_summary">Summary<span class="required"> *</span></label>
-	<input type="text" id="audit_summary" name="audit[summary]" maxlength="255" />
+	<%= f.label_for_field :details %>
+    <%= f.text_area :details,
+                   :cols => 60,
+                   :rows => (@audit.details.blank? ? 10 : [[10, @audit.details.length / 50].max, 100].min),
+                   :accesskey => accesskey(:edit),
+                   :class => 'wiki-edit',
+                   :no_label => true %>
+    <%= wikitoolbar_for 'audit_details' %>
 </p>
 
-<p>
-	<label for="audit_details">Details</label>
-	<textarea class="wiki-edit" cols="60" id="audit_details" name="audit[details]" rows="8"></textarea>
+
+<p id="auditors_form">
+	<label><%=l(:label_auditors)%></label>
+	<span id="auditors_inputs">
+		<%=
+		
+		@available_auditors.map do |user|
+			# c = checked.nil? ? object.watched_by?(user) : checked (remplace le false)
+			tag = check_box_tag 'auditors_user_ids[]', user.id, nil, :id => nil
+			content_tag 'label', "#{tag} #{h(user)}".html_safe,
+			            :id => "audit_auditors_user_ids_#{user.id}",
+			            :class => "floating"
+		end.join.html_safe
+		
+		%>
+	</span>
 </p>
-<%= wikitoolbar_for 'audit_details' %>
 
 <%= javascript_tag "observeAutocompleteField('audit_revision', '#{escape_javascript auto_complete_changesets_path(:project_id => @project)}')" %>

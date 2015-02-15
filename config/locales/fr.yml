@@ -1,0 +1,28 @@
+# French strings go here for Rails i18n
+fr:
+  permission_view_audits: Voir les audits
+  field_details: Détails
+  label_auditors: Auditeurs
+  label_update_audit: Modifier l'audit
+  label_audit: Audit
+  label_summary: Résumé
+  label_commiter: Réviseur
+  label_commited_on: Révision le
+  label_submitter: Soumetteur
+  label_submitted_on: Soumis le
+  label_updated_on: Dernière mise-à-jour
+  label_audit_new: Nouvel audit
+  label_audits: Audits
+  label_revision_comment: Commentaire de la révision
+  label_inline_comments: Inline Comments
+  label_change: Changement
+  label_path: Chemin
+  label_change_added: Ajouté
+  label_change_modified: Modifié
+  label_change_copied: Copié
+  label_change_renamed: Renommé
+  label_change_deleted: Supprimé
+  label_change_detailed: Changements détaillés
+  label_audit_commit: Auditer la révision
+  label_comment_general: Commentaire général
+  notice_audit_successful_create: "L'audit %{id} a été créé."
