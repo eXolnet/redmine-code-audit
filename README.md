@@ -1,4 +1,4 @@
-# Redmine Code Audit
+# Redmine Code Audit [![Build Status](https://travis-ci.org/eXolnet/redmine-code-audit.svg)](https://travis-ci.org/eXolnet/redmine-code-audit)
 
 Code Audit is a Redmine plugin that allows users to post audits on commits in repositories linked to projects.
 
