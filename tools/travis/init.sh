@@ -92,7 +92,7 @@ run_install() {
     export TRACE=--trace
   fi
 
-  cp $PATH_TO_PLUGINS/$PLUGIN/.travis-database.yml config/database.yml
+  cp $PATH_TO_PLUGINS/$PLUGIN/tools/travis/database.yml config/database.yml
 
   # install gems
   mkdir -p vendor/bundle
