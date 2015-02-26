@@ -1,6 +1,6 @@
 # Contributing to Redmine Code Audit
 
-Before reporting a bug, please update the plugin to its lastest version.
+Before reporting a bug, please update the plugin to its latest version.
 
 Thanks!
 
