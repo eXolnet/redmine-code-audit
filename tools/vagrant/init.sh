@@ -20,19 +20,16 @@ chown -R www-data:www-data /var/www
 ################################################################################
 
 apt-get install -q -y build-essential binutils-doc autoconf cmake zlib1g-dev \
-  sqlite3 libsqlite3-dev git
+    sqlite3 libsqlite3-dev git
 
 ################################################################################
 # RVM, Ruby and Bundler
 ################################################################################
 
-#curl -sSL https://get.rvm.io | bash -s stable --rails
-#gem install bundler
+curl -sSL https://get.rvm.io | bash -s stable --rails
+gem install bundler
 
-#apt-get install -q -y ruby-dev
-
-#sudo curl -sSL https://get.rvm.io | bash -s latest --ruby --gems=rails
-#sudo rvm rvmrc warning ignore allGemfiles
+apt-get install -q -y ruby-dev
 
 ################################################################################
 # Install Redmine
@@ -48,7 +45,7 @@ export PATH_TO_REDMINE=/var/www/redmine
 export ENVIRONMENT=development
 export PATH_TO_DATABASE_CONFIG_FILE=tools/vagrant/database.yml
 
-#bash -x "$WORKSPACE/tools/travis/init.sh" -r || exit 1
+bash -x "$WORKSPACE/tools/travis/init.sh" -r || exit 1
 chown -R www-data:www-data "$PATH_TO_REDMINE"
 
 sudo -u www-data -E bash -x "$WORKSPACE/tools/travis/init.sh" -i || exit 1
