@@ -24,6 +24,12 @@ class AuditsController < ApplicationController
 
 	def new
 		@project = Project.find(params[:project_id])
+
+		unless @project.repository
+			flash[:warning] = l(:notice_audit_no_repository_configured)
+		end
+
+		@project = Project.find(params[:project_id])
 		@audit ||= Audit.new(params[:audit])
 		@available_auditors = @project.users.sort
 		#@available_watchers = @project.users.sort
@@ -31,6 +37,12 @@ class AuditsController < ApplicationController
 
 	def create
 		@project = Project.find(params[:project_id])
+
+		unless @project.repository
+			flash[:warning] = l(:notice_audit_no_repository_configured)
+			redirect_to new_project_audit_path(@project, @audit)
+			return
+		end
 
 		revision = params[:revision]
 

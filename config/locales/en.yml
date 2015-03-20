@@ -26,3 +26,4 @@ en:
   label_audit_commit: Audit commit
   label_comment_general: General comment
   notice_audit_successful_create: "Audit %{id} created."
+  notice_audit_no_repository_configured: "You don't have any repository configured for this project."
