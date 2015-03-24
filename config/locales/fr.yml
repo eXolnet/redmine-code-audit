@@ -25,5 +25,6 @@ fr:
   label_change_detailed: Changements détaillés
   label_audit_commit: Auditer la révision
   label_comment_general: Commentaire général
+  label_reviewed_time_by: 'Revu par %{author} il y %{age}'
   notice_audit_successful_create: "L'audit %{id} a été créé."
   notice_audit_no_repository_configured: "Vous n'avez aucun entrepôt de configurer pour ce projet."

@@ -2,7 +2,7 @@
 	<h3><%= l(:label_audits) %> (<%= @comments.count.to_s %>)</h3>
 	<% for comment in @comments %>
 		<div class="audit_comment">
-			<h4><span class="author"><%= link_to_user(comment.user) %></span> reviewed this commit</h4>
+			<h4 class="title"><%= l(:label_reviewed_time_by, :author => link_to_user(comment.user), :age => time_tag(comment.created_on)).html_safe %></h4>
 			<div class="wiki">
 				<%= textilizable comment.content %>
 			</div>
