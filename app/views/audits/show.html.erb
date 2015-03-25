@@ -29,7 +29,7 @@
 			<div class="description">
 				<p><strong><%= l(:label_details) %></strong></p>
 				<div class="wiki">
-					<p><%= @audit.details %></p>
+					<%= textilizable @audit.details %>
 				</div>
 			</div>
 		<% end %>
