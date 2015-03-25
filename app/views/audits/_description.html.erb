@@ -38,17 +38,7 @@
 		</tr>
 		<tr>
 			<th><%= l(:label_commiter) %>:</th>
-			<td>
-				<%=
-
-				if @changeset.user
-					link_to_user(@changeset.user).html_safe
-				else
-					h truncate(@changeset.author.to_s, :length => 30)
-				end
-
-				%>
-			</td>
+			<td><%= link_to_user(@changeset.author).html_safe %></td>
 		</tr>
 		<% if @changeset.parents.present? %>
 		<tr>
