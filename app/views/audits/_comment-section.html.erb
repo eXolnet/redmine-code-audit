@@ -1,38 +1,38 @@
 <% if ! @comments.empty? %>
-	<h3><%= l(:label_audits) %> (<%= @comments.count.to_s %>)</h3>
-	<% for comment in @comments %>
-		<div class="audit_comment">
-			<h4 class="title"><%= l(:label_reviewed_time_by, :author => link_to_user(comment.user), :age => time_tag(comment.created_on)).html_safe %></h4>
-			<div class="wiki">
-				<%= textilizable comment.content %>
-			</div>
+  <h3><%= l(:label_audits) %> (<%= @comments.count.to_s %>)</h3>
+  <% for comment in @comments %>
+    <div class="audit_comment">
+      <h4 class="title"><%= l(:label_reviewed_time_by, :author => link_to_user(comment.user), :age => time_tag(comment.created_on)).html_safe %></h4>
+      <div class="wiki">
+        <%= textilizable comment.content %>
+      </div>
 
-			<% if ! comment.inline_comments.empty? %>
-				<h5><%= l(:label_inline_comments) %></h5>
+      <% if ! comment.inline_comments.empty? %>
+        <h5><%= l(:label_inline_comments) %></h5>
 
-				<table class="inline-comments-summary">
-					<% current_path = nil %>
-					<% for inline_comment in comment.inline_comments.all %>
-						<% if inline_comment.change.path != current_path %>
-							<% current_path = inline_comment.change.path %>
-							<tr>
-								<th colspan="2"><%= current_path %></th>
-							</tr>
-						<% end %>
+        <table class="inline-comments-summary">
+          <% current_path = nil %>
+          <% for inline_comment in comment.inline_comments.all %>
+            <% if inline_comment.change.path != current_path %>
+              <% current_path = inline_comment.change.path %>
+              <tr>
+                <th colspan="2"><%= current_path %></th>
+              </tr>
+            <% end %>
 
-						<tr>
-							<td class="inline-line-number" data-path="<%= current_path %>" data-line="<%= inline_comment.line_begin %>"><a href="#line-number"><%= inline_comment.line_number %></a></td>
-							<td class="inline-summary-content" data-path="<%= current_path %>" data-line-begin="<%= inline_comment.line_begin %>" data-line-end="<%= inline_comment.line_end %>">
-								<div class="wiki">
-									<%= textilizable inline_comment.content %>
-								</div>
-							</td>
-						</tr>
-					<% end %>
-				</table>
-			<% end %>
-		</div>
-	<% end %>
+            <tr>
+              <td class="inline-line-number" data-path="<%= current_path %>" data-line="<%= inline_comment.line_begin %>"><a href="#line-number"><%= inline_comment.line_number %></a></td>
+              <td class="inline-summary-content" data-path="<%= current_path %>" data-line-begin="<%= inline_comment.line_begin %>" data-line-end="<%= inline_comment.line_end %>">
+                <div class="wiki">
+                  <%= textilizable inline_comment.content %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </table>
+      <% end %>
+    </div>
+  <% end %>
 
-	<br />
+  <br />
 <% end %>

@@ -1,9 +1,9 @@
 module ApplicationHelper
   def link_to_audit(audit, options={})
-  	changeset = audit.changeset
-  	repository = changeset.repository
-  	project = repository.project
-  
+    changeset = audit.changeset
+    repository = changeset.repository
+    project = repository.project
+
     text = options.delete(:text) || audit.summary
     #rev = revision.respond_to?(:identifier) ? revision.identifier : revision
     link_to(

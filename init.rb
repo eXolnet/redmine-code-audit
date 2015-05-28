@@ -9,9 +9,9 @@ else
 end
 
 object_to_prepare.to_prepare do
-	require 'application_helper_patch'
-	require 'project_patch'
-	require 'changeset_patch'
+  require 'application_helper_patch'
+  require 'project_patch'
+  require 'changeset_patch'
 end
 
 # Configure our plugin

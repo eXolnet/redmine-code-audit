@@ -1,15 +1,15 @@
 class Audit < ActiveRecord::Base
-	belongs_to :project
-	belongs_to :user
-	belongs_to :changeset
-	
-	has_many :comments, :class_name => 'AuditComment', :dependent => :destroy
+  belongs_to :project
+  belongs_to :user
+  belongs_to :changeset
 
-	has_many :auditors, :class_name => 'AuditAuditor', :dependent => :delete_all
+  has_many :comments, :class_name => 'AuditComment', :dependent => :destroy
+
+  has_many :auditors, :class_name => 'AuditAuditor', :dependent => :delete_all
     has_many :auditor_users, :through => :auditors, :source => :user, :validate => false
 
-	acts_as_watchable
-	
+  acts_as_watchable
+
 
     def add_auditor(user)
       self.auditors << AuditAuditor.new(:user => user)

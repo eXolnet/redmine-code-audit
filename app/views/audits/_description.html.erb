@@ -1,75 +1,75 @@
 <table class="attributes">
-	<tbody>
-		<!--
-		<tr>
-			<th>Statut:</th>
-			<td>Concern Raised</td>
-		</tr>
-		-->
-		<tr>
-			<th><%= l(:label_submitted_on) %>:</th>
-			<td><%= format_time(@audit.created_on) %></td>
-		</tr>
-		<tr>
-			<th><%= l(:label_submitter) %>:</th>
-			<td><%= link_to_user(@audit.user) %></td>
-		</tr>
-		<% unless @audit.auditor_users.empty? %>
-			<tr>
-				<th><%= l(:label_auditors) %>:</th>
-				<td>
-					<%=
+  <tbody>
+    <!--
+    <tr>
+      <th>Statut:</th>
+      <td>Concern Raised</td>
+    </tr>
+    -->
+    <tr>
+      <th><%= l(:label_submitted_on) %>:</th>
+      <td><%= format_time(@audit.created_on) %></td>
+    </tr>
+    <tr>
+      <th><%= l(:label_submitter) %>:</th>
+      <td><%= link_to_user(@audit.user) %></td>
+    </tr>
+    <% unless @audit.auditor_users.empty? %>
+      <tr>
+        <th><%= l(:label_auditors) %>:</th>
+        <td>
+          <%=
 
-					@audit.auditor_users.map do |user|
-						link_to_user(user).html_safe
-					end.join(', ').html_safe
+          @audit.auditor_users.map do |user|
+            link_to_user(user).html_safe
+          end.join(', ').html_safe
 
-					%>
-				</td>
-			</tr>
-		<% end %>
-		<tr>
-			<th><%= l(:label_revision) %>:</th>
-			<td><%= link_to_revision(@audit.changeset, @repository) %></td>
-		</tr>
-		<tr>
-			<th><%= l(:label_commited_on) %>:</th>
-			<td><%= format_time(@changeset.committed_on) %></td>
-		</tr>
-		<tr>
-			<th><%= l(:label_commiter) %>:</th>
-			<td><%= link_to_user(@changeset.author).html_safe %></td>
-		</tr>
-		<% if @changeset.parents.present? %>
-		<tr>
-			<th><%= l(:label_parent_revision) %>:</th>
-			<td>
-				<%= @changeset.parents.collect{
-					  |p| link_to_revision(p, @repository, :text => format_revision(p))
-					}.join(", ").html_safe %>
-			</td>
-		</tr>
-		<% end %>
-		<% if @changeset.children.present? %>
-		<tr>
-			<th><%= l(:label_child_revision) %>:</th>
-			<td>
-				<%= @changeset.children.collect{
-					  |p| link_to_revision(p, @repository, :text => format_revision(p))
-					 }.join(", ").html_safe %>
-			</td>
-		</tr>
-		<% end %>
+          %>
+        </td>
+      </tr>
+    <% end %>
+    <tr>
+      <th><%= l(:label_revision) %>:</th>
+      <td><%= link_to_revision(@audit.changeset, @repository) %></td>
+    </tr>
+    <tr>
+      <th><%= l(:label_commited_on) %>:</th>
+      <td><%= format_time(@changeset.committed_on) %></td>
+    </tr>
+    <tr>
+      <th><%= l(:label_commiter) %>:</th>
+      <td><%= link_to_user(@changeset.author).html_safe %></td>
+    </tr>
+    <% if @changeset.parents.present? %>
+    <tr>
+      <th><%= l(:label_parent_revision) %>:</th>
+      <td>
+        <%= @changeset.parents.collect{
+            |p| link_to_revision(p, @repository, :text => format_revision(p))
+          }.join(", ").html_safe %>
+      </td>
+    </tr>
+    <% end %>
+    <% if @changeset.children.present? %>
+    <tr>
+      <th><%= l(:label_child_revision) %>:</th>
+      <td>
+        <%= @changeset.children.collect{
+            |p| link_to_revision(p, @repository, :text => format_revision(p))
+           }.join(", ").html_safe %>
+      </td>
+    </tr>
+    <% end %>
 
-		<!--
-		<tr>
-			<th>Branches:</th>
-			<td>develop, feature-Account-Nodification, feature-correction-comptes, feature/customers-mvp</td>
-		</tr>
-		<tr>
-			<th>Tags:</th>
-			<td>None</td>
-		</tr>
-		-->
-	</tbody>
+    <!--
+    <tr>
+      <th>Branches:</th>
+      <td>develop, feature-Account-Nodification, feature-correction-comptes, feature/customers-mvp</td>
+    </tr>
+    <tr>
+      <th>Tags:</th>
+      <td>None</td>
+    </tr>
+    -->
+  </tbody>
 </table>
