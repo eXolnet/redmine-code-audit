@@ -6,8 +6,8 @@ fr:
   label_update_audit: Modifier l'audit
   label_audit: Audit
   label_summary: Résumé
-  label_commiter: Réviseur
-  label_commited_on: Révision le
+  label_committer: Réviseur
+  label_committed_on: Révision le
   label_submitter: Soumetteur
   label_submitted_on: Soumis le
   label_updated_on: Dernière mise-à-jour

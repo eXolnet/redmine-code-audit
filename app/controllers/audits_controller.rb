@@ -5,18 +5,28 @@ class AuditsController < ApplicationController
   include RepositoriesHelper
   helper :watchers
   include WatchersHelper
+  helper :sort
+  include SortHelper
 
   def index
     @project = Project.find(params[:project_id])
+
+    sort_init 'updated_on', 'desc'
+    sort_update 'revision' => "#{Changeset.table_name}.revision",
+                'summary' => "#{Audit.table_name}.summary",
+                'committed_on' => "#{Changeset.table_name}.committed_on",
+                'updated_on' => "#{Audit.table_name}.updated_on"
+
     @query = @project.audits
 
     @limit = per_page_option
     @audit_count = @query.count
-    @audit_pages = Paginator.new self, @audit_count, @limit, params['page']
-    @offset ||= @audit_pages.current.offset
+    @audit_pages = Paginator.new @audit_count, @limit, params['page']
+    @offset ||= @audit_pages.offset
 
     @audits = @query
-      .order("#{Audit.table_name}.updated_on DESC")
+      .includes(:changeset, :user)
+      .reorder(sort_clause)
       .offset(@offset)
       .limit(@limit)
       .all

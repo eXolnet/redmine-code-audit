@@ -6,8 +6,8 @@ en:
   label_update_audit: Update audit
   label_audit: Audit
   label_summary: Summary
-  label_commiter: Commiter
-  label_commited_on: Commited on
+  label_committer: Commiter
+  label_committed_on: Commited on
   label_submitter: Submitter
   label_submitted_on: Submitted on
   label_updated_on: Updated on

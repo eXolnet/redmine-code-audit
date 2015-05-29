@@ -8,12 +8,12 @@
   <table class="list list-audits">
     <thead>
       <tr>
-        <th><%= l(:label_revision) %></th>
-        <th><%= l(:label_summary) %></th>
-        <th><%= l(:label_commiter) %></th>
-        <th><%= l(:label_commited_on) %></th>
+        <%= sort_header_tag('revision', :title => l(:label_revision)) %>
+        <%= sort_header_tag('summary', :title => l(:label_summary)) %>
+        <th><%= l(:label_committer) %></th>
+        <%= sort_header_tag('committed_on', :title => l(:label_committed_on)) %>
         <th><%= l(:label_submitter) %></th>
-        <th><%= l(:label_updated_on) %></th>
+        <%= sort_header_tag('updated_on', :title => l(:label_updated_on)) %>
       </tr>
     </thead>
 
