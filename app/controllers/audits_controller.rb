@@ -71,6 +71,8 @@ class AuditsController < ApplicationController
       flash[:notice] = l(:notice_audit_successful_create, :id => view_context.link_to("##{@audit.id}", project_audit_path(@project, @audit)))
       redirect_to project_audit_path(@project, @audit)
       return
+    else
+      redirect_to new_project_audit_path(@project)
     end
   end
 

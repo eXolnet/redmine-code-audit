@@ -28,3 +28,4 @@ en:
   label_reviewed_time_by: 'Reviewed by %{author} %{age} ago'
   notice_audit_successful_create: "Audit %{id} created."
   notice_audit_no_repository_configured: "You don't have any repository configured for this project."
+  text_audit_added: "Audit %{id} has been created by %{author}."
