@@ -4,8 +4,8 @@
 <li><%= l(:label_submitted_on) %>: <%= format_time(audit.created_on) %></li>
 <li><%= l(:label_submitter) %>: <%= link_to_user(audit.user) %></li>
 <li><%= l(:label_revision) %>: <%= changeset.revision %></li>
-<li><%= l(:label_commited_on) %>: <%= format_time(changeset.committed_on) %></li>
-<li><%= l(:label_commiter) %>: <%= link_to_user(changeset.author).html_safe %></li>
+<li><%= l(:label_committed_on) %>: <%= format_time(changeset.committed_on) %></li>
+<li><%= l(:label_committer) %>: <%= link_to_user(changeset.author).html_safe %></li>
 </ul>
 
 <%= textilizable(audit, :details, :only_path => false) %>
