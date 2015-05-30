@@ -1,4 +1,15 @@
 class Audit < ActiveRecord::Base
+  # Audit statuses
+  STATUS_NONE               = '';
+  STATUS_AUDIT_NOT_REQUIRED = 'audit-not-required';
+  STATUS_AUDIT_REQUIRED     = 'audit-required';
+  STATUS_CONCERNED          = 'concerned';
+  STATUS_ACCEPTED           = 'accepted';
+  STATUS_AUDIT_REQUESTED    = 'requested';
+  STATUS_RESIGNED           = 'resigned';
+  STATUS_CLOSED             = 'closed';
+  STATUS_CC                 = 'cc';
+
   belongs_to :project
   belongs_to :user
   belongs_to :changeset
@@ -10,17 +21,16 @@ class Audit < ActiveRecord::Base
 
   acts_as_watchable
 
+  def add_auditor(user)
+    self.auditors << AuditAuditor.new(:user => user)
+  end
 
-    def add_auditor(user)
-      self.auditors << AuditAuditor.new(:user => user)
-    end
+  def remove_auditor(user)
+    return nil unless user && user.is_a?(User)
+    AuditAuditor.delete_all "audit_id = #{self.id} AND user_id = #{user.id}"
+  end
 
-    def remove_auditor(user)
-      return nil unless user && user.is_a?(User)
-      AuditAuditor.delete_all "audit_id = #{self.id} AND user_id = #{user.id}"
-    end
-
-    def set_auditor(user, auditing=true)
-      auditing ? add_auditor(user) : remove_auditor(user)
-    end
+  def set_auditor(user, auditing=true)
+    auditing ? add_auditor(user) : remove_auditor(user)
+  end
 end
