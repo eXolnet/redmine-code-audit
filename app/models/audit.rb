@@ -1,8 +1,8 @@
 class Audit < ActiveRecord::Base
   # Audit statuses
   STATUS_NONE               = '';
-  STATUS_AUDIT_NOT_REQUIRED = 'audit-not-required';
-  STATUS_AUDIT_REQUIRED     = 'audit-required';
+  STATUS_AUDIT_NOT_REQUIRED = 'audit_not_required';
+  STATUS_AUDIT_REQUIRED     = 'audit_required';
   STATUS_CONCERNED          = 'concerned';
   STATUS_ACCEPTED           = 'accepted';
   STATUS_AUDIT_REQUESTED    = 'requested';
@@ -25,6 +25,18 @@ class Audit < ActiveRecord::Base
 
   def author
     user
+  end
+
+  def opened?
+    [STATUS_AUDIT_REQUIRED, STATUS_AUDIT_REQUESTED, STATUS_CONCERNED].include?(status)
+  end
+
+  def closed?
+    !opened?
+  end
+
+  def status_label
+    l("status_#{status}")
   end
 
   def add_auditor(user)

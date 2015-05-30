@@ -16,6 +16,7 @@ fr:
   label_revision_comment: Commentaire de la révision
   label_inline_comments: Inline Comments
   label_change: Changement
+  label_status: Statut
   label_path: Chemin
   label_change_added: Ajouté
   label_change_modified: Modifié
@@ -29,3 +30,12 @@ fr:
   notice_audit_successful_create: "L'audit %{id} a été créé."
   notice_audit_no_repository_configured: "Vous n'avez aucun entrepôt de configurer pour ce projet."
   text_issue_added: "L'audit #%{id} a été créé par %{author}."
+  status_: Aucun
+  status_audit_not_required: Audit non requis
+  status_audit_required: Audit requis
+  status_concerned: Concerné
+  status_accepted: Accepté
+  status_requested: Demandé
+  status_resigned: Résigné
+  status_closed: Fermé
+  status_cc: CC

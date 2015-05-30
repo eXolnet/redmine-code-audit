@@ -6,8 +6,8 @@ en:
   label_update_audit: Update audit
   label_audit: Audit
   label_summary: Summary
-  label_committer: Commiter
-  label_committed_on: Commited on
+  label_committer: Committer
+  label_committed_on: Committed on
   label_submitter: Submitter
   label_submitted_on: Submitted on
   label_updated_on: Updated on
@@ -16,6 +16,7 @@ en:
   label_revision_comment: Revision comment
   label_inline_comments: Inline Comments
   label_change: Change
+  label_status: Status
   label_path: Path
   label_change_added: Added
   label_change_modified: Modified
@@ -29,3 +30,12 @@ en:
   notice_audit_successful_create: "Audit %{id} created."
   notice_audit_no_repository_configured: "You don't have any repository configured for this project."
   text_audit_added: "Audit %{id} has been created by %{author}."
+  status_: None
+  status_audit_not_required: Audit not required
+  status_audit_required: Audit required
+  status_concerned: Concerned
+  status_accepted: Accepted
+  status_requested: Requested
+  status_resigned: Resigned
+  status_closed: Closed
+  status_cc: CC

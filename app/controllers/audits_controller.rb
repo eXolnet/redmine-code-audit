@@ -14,6 +14,7 @@ class AuditsController < ApplicationController
     sort_init 'updated_on', 'desc'
     sort_update 'revision' => "#{Changeset.table_name}.revision",
                 'summary' => "#{Audit.table_name}.summary",
+                'status' => "#{Audit.table_name}.status",
                 'committed_on' => "#{Changeset.table_name}.committed_on",
                 'updated_on' => "#{Audit.table_name}.updated_on"
 
@@ -60,6 +61,7 @@ class AuditsController < ApplicationController
     @audit.project = @project
     @audit.user = User.current
     @audit.changeset = @project.repository.changesets.where("#{Changeset.table_name}.revision LIKE ?", "%#{revision}%").first
+    @audit.status = Audit::STATUS_AUDIT_REQUESTED
 
     if @audit.save
       unless params[:auditors_user_ids].nil?

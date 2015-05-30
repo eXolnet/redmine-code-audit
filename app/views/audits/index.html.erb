@@ -10,6 +10,7 @@
       <tr>
         <%= sort_header_tag('revision', :title => l(:label_revision)) %>
         <%= sort_header_tag('summary', :title => l(:label_summary)) %>
+        <%= sort_header_tag('status', :title => l(:label_status)) %>
         <th><%= l(:label_committer) %></th>
         <%= sort_header_tag('committed_on', :title => l(:label_committed_on)) %>
         <th><%= l(:label_submitter) %></th>
@@ -22,6 +23,7 @@
         <tr class="<%= cycle("odd", "even") %>">
           <td class="revision"><%= link_to_revision(audit.changeset, audit.changeset.repository) %></td>
           <td class="subject"><%= link_to_audit(audit) %></td>
+          <td class="status"><%= audit.status_label %></td>
           <td class="commiter"><%= h audit.changeset.author %></td>
           <td class="commited_on"><%= format_time(audit.changeset.committed_on) %></td>
           <td class="submitter">
