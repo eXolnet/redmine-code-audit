@@ -81,7 +81,7 @@ class Audit < ActiveRecord::Base
     # new_record? returns false in after_save callbacks
     if id_changed?
       Mailer.audit_created(self).deliver
-    elsif text_changed?
+    #elsif text_changed?
       #Mailer.wiki_content_updated(self).deliver
     end
   end

@@ -51,8 +51,16 @@
   <h3><%= l(:label_audit_commit) %></h3>
   <div class="tabular">
     <p>
+      <label for="audit_action"><%= l(:label_action) %>:</label>
+      <select id="audit_action" name="audit_action">
+        <option value="">Comment</option>
+        <option value="<%= Audit::STATUS_ACCEPTED %>">Accept Revision ✔</option>
+        <option value="<%= Audit::STATUS_CONCERNED %>">Request Changes ✘</option>
+      </select>
+    </p>
+    <p>
       <label for="audit_comment"><%= l(:label_comment_general) %>:</label>
-      <textarea class="wiki-edit" cols="60" id="audit_comment" name="audit[content]" rows="8"></textarea>
+      <textarea class="wiki-edit" cols="60" id="audit_comment" name="audit_comment" rows="8"></textarea>
     </p>
     <%= wikitoolbar_for 'audit_comment' %>
   </div>

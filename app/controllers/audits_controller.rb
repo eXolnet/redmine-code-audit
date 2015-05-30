@@ -102,11 +102,20 @@ class AuditsController < ApplicationController
     @project = Project.find(params[:project_id])
     @audit = Audit.find(params[:id])
 
+    # Update status
+    unless params[:audit_action] && params[:audit_action].empty?
+      @audit.status = params[:audit_action]
+      @audit.save
+    end
+
     # Save comment
-    @comment = AuditComment.new(params[:audit])
-    @comment.audit = @audit
-    @comment.user = User.current
-    @audit.comments << @comment
+    unless params[:audit_comment] && params[:audit_comment].empty?
+      @comment = AuditComment.new()
+      @comment.content = params[:audit_comment]
+      @comment.audit = @audit
+      @comment.user = User.current
+      @audit.comments << @comment
+    end
 
     # Save inline comments
     unless params[:inline_comment].nil?

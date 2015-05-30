@@ -17,6 +17,7 @@ en:
   label_inline_comments: Inline Comments
   label_change: Change
   label_status: Status
+  label_action: Action
   label_path: Path
   label_change_added: Added
   label_change_modified: Modified
