@@ -1,3 +1,5 @@
+<input type="text" class="autofocus-fix">
+
 <div class="contextual">
   <%= link_to l(:button_update), edit_project_audit_path(@project, @audit), :class => 'icon icon-edit', :accesskey => accesskey(:edit) %>
   <%= watcher_link(@audit, User.current) %>

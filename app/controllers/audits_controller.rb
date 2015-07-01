@@ -1,36 +1,69 @@
 class AuditsController < ApplicationController
-  unloadable
+  default_search_scope :issues
 
   helper :repositories
   include RepositoriesHelper
   helper :watchers
   include WatchersHelper
+  helper :queries
+  include QueriesHelper
   helper :sort
   include SortHelper
+  include CodeAudit::AuditHelper
 
   def index
-    @project = Project.find(params[:project_id])
+    retrieve_audit_query
+    sort_init(@query.sort_criteria.empty? ? [['id', 'desc']] : @query.sort_criteria)
+    sort_update(@query.sortable_columns)
+    @query.sort_criteria = sort_criteria.to_a
 
-    sort_init 'updated_on', 'desc'
-    sort_update 'revision' => "#{Changeset.table_name}.revision",
-                'summary' => "#{Audit.table_name}.summary",
-                'status' => "#{Audit.table_name}.status",
-                'committed_on' => "#{Changeset.table_name}.committed_on",
-                'updated_on' => "#{Audit.table_name}.updated_on"
+    logger.debug "Query: #{@query.inspect}"
+    logger.debug "Query is valid: #{@query.valid?}"
 
-    @query = @project.audits
+    if @query.valid?
+      @project = Project.find(params[:project_id])
 
-    @limit = per_page_option
-    @audit_count = @query.count
-    @audit_pages = Paginator.new @audit_count, @limit, params['page']
-    @offset ||= @audit_pages.offset
+      # sort_init 'updated_on', 'desc'
+      # sort_update 'revision' => "#{Changeset.table_name}.revision",
+      #             'summary' => "#{Audit.table_name}.summary",
+      #             'status' => "#{Audit.table_name}.status",
+      #             'committed_on' => "#{Changeset.table_name}.committed_on",
+      #             'updated_on' => "#{Audit.table_name}.updated_on"
 
-    @audits = @query
-      .includes(:changeset, :user)
-      .reorder(sort_clause)
-      .offset(@offset)
-      .limit(@limit)
-      .all
+      # @query = @project.audits
+
+      # @limit = per_page_option
+      # @audit_count = @query.count
+      # @audit_pages = Paginator.new @audit_count, @limit, params['page']
+      # @offset ||= @audit_pages.offset
+
+      # @audits = @query
+      #   .includes(:changeset, :user)
+      #   .reorder(sort_clause)
+      #   .offset(@offset)
+      #   .limit(@limit)
+      #   .all
+
+      @limit = per_page_option
+      @audit_count = @query.audit_count
+      @audit_pages = Paginator.new @audit_count, @limit, params['page']
+      @offset ||= @audit_pages.offset
+      @audits = @query.audits(:order => sort_clause,
+                              :offset => @offset,
+                              :limit => @limit)
+
+      logger.debug "Audits: #{@audits.inspect}"
+
+      respond_to do |format|
+        format.html { render :template => 'audits/index', :layout => !request.xhr? }
+        format.js
+      end
+    else
+      respond_to do |format|
+        format.html { render(:template => 'audits/index', :layout => !request.xhr?) }
+        format.js
+      end
+    end
   end
 
   def new
@@ -60,8 +93,11 @@ class AuditsController < ApplicationController
     @audit = Audit.new(params[:audit])
     @audit.project = @project
     @audit.user = User.current
-    @audit.changeset = @project.repository.changesets.where("#{Changeset.table_name}.revision LIKE ?", "%#{revision}%").first
     @audit.status = Audit::STATUS_AUDIT_REQUESTED
+
+    unless revision.empty?
+      @audit.changeset = @project.repository.changesets.where("#{Changeset.table_name}.revision LIKE ?", "%#{revision}%").first
+    end
 
     if @audit.save
       unless params[:auditors_user_ids].nil?
@@ -74,7 +110,9 @@ class AuditsController < ApplicationController
       redirect_to project_audit_path(@project, @audit)
       return
     else
-      redirect_to new_project_audit_path(@project)
+      @available_auditors = @project.users.sort
+
+      render :action => 'new'
     end
   end
 

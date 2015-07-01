@@ -9,10 +9,12 @@ else
 end
 
 object_to_prepare.to_prepare do
-  require_dependency 'application_helper_patch'
-  require_dependency 'project_patch'
-  require_dependency 'changeset_patch'
-  require_dependency 'mailer_patch'
+  require_dependency 'code_audit/patches/application_helper_patch'
+  require_dependency 'code_audit/patches/project_patch'
+  require_dependency 'code_audit/patches/changeset_patch'
+  require_dependency 'code_audit/patches/mailer_patch'
+
+  require_dependency 'code_audit/helpers/audit_helper'
 end
 
 # Configure our plugin

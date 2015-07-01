@@ -2,7 +2,7 @@ class AuditAuditor < ActiveRecord::Base
   belongs_to :audit, :polymorphic => true
   belongs_to :user
 
-  validates_presence_of :user
+  validates_presence_of :audit, :user
   validate :validate_user
 
   def validate_user

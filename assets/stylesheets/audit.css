@@ -1,3 +1,7 @@
+.autofocus-fix {
+  display: none !important;
+}
+
 div.audit {
   background: #ffffdd;
   padding: 6px;
@@ -123,6 +127,7 @@ div.audit .attributes th {
 
 
 .list-audits .revision { text-align: center; max-width: 100px; }
+.list-audits .summary { text-align: left; font-style: normal; }
 .list-audits .commiter { text-align: center; max-width: 200px; }
 .list-audits .commited_on { text-align: center; max-width: 150px; }
 .list-audits .submitter { text-align: center; max-width: 200px; }

@@ -21,7 +21,23 @@ class Audit < ActiveRecord::Base
 
   acts_as_watchable
 
+  validates_presence_of :summary, :project, :user, :changeset
+  validates_length_of :summary, :maximum => 255
+
   after_save :send_notification
+
+  def self.statuses
+    {
+      STATUS_AUDIT_NOT_REQUIRED => l('status_audit_not_required'),
+      STATUS_AUDIT_REQUIRED     => l('status_audit_required'),
+      STATUS_CONCERNED          => l('status_concerned'),
+      STATUS_ACCEPTED           => l('status_accepted'),
+      STATUS_AUDIT_REQUESTED    => l('status_requested'),
+      STATUS_RESIGNED           => l('status_resigned'),
+      STATUS_CLOSED             => l('status_closed'),
+      STATUS_CC                 => l('status_cc'),
+    }
+  end
 
   def author
     user
