@@ -1,216 +1,81 @@
+<input type="text" class="autofocus-fix">
+
 <div class="contextual">
-	<%= link_to l(:button_update), edit_project_audit_path(@project, @audit), :class => 'icon icon-edit', :accesskey => accesskey(:edit) %>
-	<%= watcher_link(@audit, User.current) %>
-	<%= delete_link project_audit_path(@project, @audit) %>
+  <%= link_to l(:button_update), edit_project_audit_path(@project, @audit), :class => 'icon icon-edit', :accesskey => accesskey(:edit) %>
+  <%= watcher_link(@audit, User.current) %>
+  <%= delete_link project_audit_path(@project, @audit) %>
 </div>
 
 <%= form_tag({:action => 'comment'}) do %>
-	<h2><%= l(:label_audit) + ' #' + @audit.id.to_s %></h2>
-	
-	<div class="audit">
-		<h3><%= @audit.summary %></h3>
-	
-		<table class="attributes">
-			<tbody>
-				<!--
-				<tr>
-					<th>Statut:</th>
-					<td>Concern Raised</td>
-				</tr>
-				-->
-				<tr>
-					<th><%= l(:label_submitted_on) %>:</th>
-					<td><%= format_time(@audit.created_on) %></td>
-				</tr>
-				<tr>
-					<th><%= l(:label_submitter) %>:</th>
-					<td><%= link_to_user(@audit.user) %></td>
-				</tr>
-				<% unless @audit.auditor_users.empty? %>
-					<tr>
-						<th><%= l(:label_auditors) %>:</th>
-						<td>
-							<%=
-							
-							@audit.auditor_users.map do |user|
-								link_to_user(user).html_safe
-							end.join(', ').html_safe
-							
-							%>
-						</td>
-					</tr>
-				<% end %>
-				<tr>
-					<th><%= l(:label_revision) %>:</th>
-					<td><%= link_to_revision(@audit.changeset, @repository) %></td>
-				</tr>
-				<tr>
-					<th><%= l(:label_commited_on) %>:</th>
-					<td><%= format_time(@changeset.committed_on) %></td>
-				</tr>
-				<tr>
-					<th><%= l(:label_commiter) %>:</th>
-					<td><%= h truncate(@changeset.author.to_s, :length => 30) %></td>
-				</tr>
-				<% if @changeset.parents.present? %>
-				<tr>
-					<th><%= l(:label_parent_revision) %>:</th>
-					<td>
-						<%= @changeset.parents.collect{
-				              |p| link_to_revision(p, @repository, :text => format_revision(p))
-				            }.join(", ").html_safe %>
-				    </td>
-				</tr>
-				<% end %>
-				<% if @changeset.children.present? %>
-				<tr>
-					<th><%= l(:label_child_revision) %>:</th>
-					<td>
-						<%= @changeset.children.collect{
-				              |p| link_to_revision(p, @repository, :text => format_revision(p))
-				             }.join(", ").html_safe %>
-					</td>
-				</tr>
-				<% end %>
-				
-				<!--
-				<tr>
-					<th>Branches:</th>
-					<td>develop, feature-Account-Nodification, feature-correction-comptes, feature/customers-mvp</td>
-				</tr>
-				<tr>
-					<th>Tags:</th>
-					<td>None</td>
-				</tr>
-				-->
-			</tbody>
-		</table>
-		
-		<% if (@changeset.comments?) %>
-			<hr />
-			
-			<div class="comment">
-				<p><strong><%= l(:label_revision_comment) %></strong></p>
-				<div class="wiki">
-					<p><%= @changeset.comments %></p>
-				</div>
-			</div>
-		<% end; %>
-		
-		<% if (@audit.details?) %>
-			<hr />
-			
-			<div class="description">
-				<p><strong><%= l(:label_details) %></strong></p>
-				<div class="wiki">
-					<p><%= @audit.details %></p>
-				</div>
-			</div>
-		<% end %>
-	</div>
-	
-	<br />
-	
-	<% if ! @comments.empty? %>
-		<h3><%= l(:label_audits) %> (<%= @comments.count.to_s %>)</h3>
-		<% for comment in @comments %>
-			<div class="audit_comment">
-				<h4><span class="author"><%= link_to_user(comment.user) %></span> reviewed this commit</h4>
-				<div class="wiki">
-					<%= textilizable comment.content %>
-				</div>
-				
-				<% if ! comment.inline_comments.empty? %>
-					<h5><%= l(:label_inline_comments) %></h5>
-					
-					<table class="inline-comments-summary">
-						<% current_path = nil %>
-						<% for inline_comment in comment.inline_comments.all %>
-							<% if inline_comment.change.path != current_path %>
-								<% current_path = inline_comment.change.path %>
-								<tr>
-									<th colspan="2"><%= current_path %></th>
-								</tr>
-							<% end %>
-						
-							<tr>
-								<td class="inline-line-number" data-path="<%= current_path %>" data-line="<%= inline_comment.line_begin %>"><a href="#line-number"><%= inline_comment.line_number %></a></td>
-								<td class="inline-summary-content" data-path="<%= current_path %>" data-line-begin="<%= inline_comment.line_begin %>" data-line-end="<%= inline_comment.line_end %>">
-									<div class="wiki">
-										<%= textilizable inline_comment.content %>
-									</div>
-								</td>
-							</tr>
-						<% end %>
-					</table>
-				<% end %>
-			</div>
-		<% end %>
-		
-		<br />
-	<% end %>
-	
-	<h3><%= l(:label_change_plural) %> (<%= @filechanges.count.to_s %>)</h3>
-	<table class="list list-audit-changes">
-		<thead>
-			<tr>
-				<th><%= l(:label_history) %></th>
-				<th><%= l(:button_view) %></th>
-				<th><%= l(:label_change) %></th>
-				<th><%= l(:label_path) %></th>
-			</tr>
-		</thead>
-		<tbody>
-			<% for change in @filechanges %>
-				<tr class="<%= cycle("odd", "even") %>" data-change-id="<%= change.id %>">
-					<td class="text-center"><%= link_to l(:label_history), {:controller => 'repositories', :action => 'changes', :id => @project.id, :repository_id => @repository.identifier_param, :path => to_path_param(change.path), :rev => @rev } %></td>
-					<td class="text-center"><%= link_to l(:button_view), {:controller => 'repositories', :action => 'entry', :id => @project.id, :repository_id => @repository.identifier_param, :path => to_path_param(change.path), :rev => @rev } %></td>
-					<td class="text-center">
-						<a href="#change" class="audit-change">
-							<% if change.action == 'A' %>
-								<%= l(:label_change_added) %>
-							<% elsif change.action == 'M' %>
-								<%= l(:label_change_modified) %>
-							<% elsif change.action == 'C' %>
-								<%= l(:label_change_copied) %>
-							<% elsif change.action == 'R' %>
-								<%= l(:label_change_renamed) %>
-							<% elsif change.action == 'D' %>
-								<%= l(:label_change_deleted) %>
-							<% end %>
-						</a>
-					</td>
-					<td><%= change.path %></td>
-				</tr>
-			<% end %>
-		</tbody>
-	</table>
-	
-	<br />
-	
-	<h3><%= l(:label_change_detailed) %></h3>
-	<%= render :partial => 'common/diff', :locals => {:diff => @diff, :diff_type => @diff_type, :diff_style => @repository.class.scm_name} %>
-	
-	<br />
-	
-	<h3><%= l(:label_audit_commit) %></h3>
-	<div class="tabular">
-		<p>
-			<label for="audit_comment"><%= l(:label_comment_general) %>:</label>
-			<textarea class="wiki-edit" cols="60" id="audit_comment" name="audit[content]" rows="8"></textarea>
-		</p>
-		<%= wikitoolbar_for 'audit_comment' %>
-	</div>
-	
-	<p class="audit-buttons">
-		<%= submit_tag l(:button_save) %>
-	</p>
+  <h2><%= l(:label_audit) + ' #' + @audit.id.to_s %></h2>
+
+  <div class="audit">
+    <h3><%= @audit.summary %></h3>
+
+    <%= render :partial => 'description' %>
+
+    <% if (@changeset.comments?) %>
+      <hr />
+
+      <div class="comment">
+        <p><strong><%= l(:label_revision_comment) %></strong></p>
+        <div class="wiki">
+          <p><%= @changeset.comments %></p>
+        </div>
+      </div>
+    <% end; %>
+
+    <% if (@audit.details?) %>
+      <hr />
+
+      <div class="description">
+        <p><strong><%= l(:label_details) %></strong></p>
+        <div class="wiki">
+          <%= textilizable @audit.details %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <br />
+
+  <%= render :partial => 'comment-section' %>
+
+  <%= render :partial => 'file-changes' %>
+
+  <br />
+
+  <h3><%= l(:label_change_detailed) %></h3>
+  <%= render :partial => 'diff', :locals => {:diff => @diff, :diff_type => @diff_type, :diff_style => @repository.class.scm_name} %>
+
+  <br />
+
+  <h3><%= l(:label_audit_commit) %></h3>
+  <div class="tabular">
+    <p>
+      <label for="audit_action"><%= l(:label_action) %>:</label>
+      <select id="audit_action" name="audit_action">
+        <option value="">Comment</option>
+        <option value="<%= Audit::STATUS_ACCEPTED %>">Accept Revision ✔</option>
+        <option value="<%= Audit::STATUS_CONCERNED %>">Request Changes ✘</option>
+      </select>
+    </p>
+    <p>
+      <label for="audit_comment"><%= l(:label_comment_general) %>:</label>
+      <textarea class="wiki-edit" cols="60" id="audit_comment" name="audit_comment" rows="8"></textarea>
+    </p>
+    <%= wikitoolbar_for 'audit_comment' %>
+  </div>
+
+  <p class="audit-buttons">
+    <%= submit_tag l(:button_save) %>
+  </p>
 <% end %>
 
 <%= hidden_field_tag 'comment_user_name', User.current.to_s, :id => 'comment_user_name' %>
 
 <% content_for :header_tags do %>
-	<%= stylesheet_link_tag "scm" %>
-	<%= stylesheet_link_tag 'audit', :plugin => 'code_audit' %>
-	<%= javascript_include_tag 'audit', :plugin => 'code_audit' %>
+  <%= stylesheet_link_tag "scm" %>
+  <%= stylesheet_link_tag 'audit', :plugin => 'code_audit' %>
+  <%= javascript_include_tag 'audit', :plugin => 'code_audit' %>
 <% end %>

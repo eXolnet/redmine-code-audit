@@ -1,0 +1,35 @@
+<h3><%= l(:label_change_plural) %> (<%= @filechanges.count.to_s %>)</h3>
+<table class="list list-audit-changes">
+  <thead>
+    <tr>
+      <th><%= l(:label_history) %></th>
+      <th><%= l(:button_view) %></th>
+      <th><%= l(:label_change) %></th>
+      <th><%= l(:label_path) %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% for change in @filechanges %>
+      <tr class="<%= cycle("odd", "even") %>" data-change-id="<%= change.id %>">
+        <td class="text-center"><%= link_to l(:label_history), {:controller => 'repositories', :action => 'changes', :id => @project.id, :repository_id => @repository.identifier_param, :path => to_path_param(change.path), :rev => @rev } %></td>
+        <td class="text-center"><%= link_to l(:button_view), {:controller => 'repositories', :action => 'entry', :id => @project.id, :repository_id => @repository.identifier_param, :path => to_path_param(change.path), :rev => @rev } %></td>
+        <td class="text-center">
+          <a href="#change" class="audit-change">
+            <% if change.action == 'A' %>
+              <%= l(:label_change_added) %>
+            <% elsif change.action == 'M' %>
+              <%= l(:label_change_modified) %>
+            <% elsif change.action == 'C' %>
+              <%= l(:label_change_copied) %>
+            <% elsif change.action == 'R' %>
+              <%= l(:label_change_renamed) %>
+            <% elsif change.action == 'D' %>
+              <%= l(:label_change_deleted) %>
+            <% end %>
+          </a>
+        </td>
+        <td><%= change.path %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

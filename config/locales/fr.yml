@@ -6,8 +6,8 @@ fr:
   label_update_audit: Modifier l'audit
   label_audit: Audit
   label_summary: Résumé
-  label_commiter: Réviseur
-  label_commited_on: Révision le
+  label_committer: Réviseur
+  label_committed_on: Révision le
   label_submitter: Soumetteur
   label_submitted_on: Soumis le
   label_updated_on: Dernière mise-à-jour
@@ -16,6 +16,8 @@ fr:
   label_revision_comment: Commentaire de la révision
   label_inline_comments: Inline Comments
   label_change: Changement
+  label_status: Statut
+  label_action: Action
   label_path: Chemin
   label_change_added: Ajouté
   label_change_modified: Modifié
@@ -25,4 +27,19 @@ fr:
   label_change_detailed: Changements détaillés
   label_audit_commit: Auditer la révision
   label_comment_general: Commentaire général
+  label_reviewed_time_by: 'Revu par %{author} il y %{age}'
   notice_audit_successful_create: "L'audit %{id} a été créé."
+  notice_audit_no_repository_configured: "Vous n'avez aucun entrepôt de configurer pour ce projet."
+  text_issue_added: "L'audit #%{id} a été créé par %{author}."
+  status_: Aucun
+  status_audit_not_required: Audit non requis
+  status_audit_required: Audit requis
+  status_concerned: Souci soulevé
+  status_accepted: Accepté
+  status_requested: Audit demandé
+  status_resigned: Résigné
+  status_closed: Fermé
+  status_cc: Copié
+  field_revision: Révision
+  field_committer: Réviseur
+  field_committed_on: Révision le

@@ -1,156 +1,229 @@
 class AuditsController < ApplicationController
-	unloadable
+  default_search_scope :issues
 
-	helper :repositories
-	include RepositoriesHelper
-	helper :watchers
-	include WatchersHelper
+  helper :repositories
+  include RepositoriesHelper
+  helper :watchers
+  include WatchersHelper
+  helper :queries
+  include QueriesHelper
+  helper :sort
+  include SortHelper
+  include CodeAudit::AuditHelper
 
-	def index
-		@project = Project.find(params[:project_id])
-		@query = @project.audits
+  def index
+    retrieve_audit_query
+    sort_init(@query.sort_criteria.empty? ? [['id', 'desc']] : @query.sort_criteria)
+    sort_update(@query.sortable_columns)
+    @query.sort_criteria = sort_criteria.to_a
 
-		@limit = per_page_option
-		@audit_count = @query.count
-		@audit_pages = Paginator.new self, @audit_count, @limit, params['page']
-		@offset ||= @audit_pages.current.offset
+    logger.debug "Query: #{@query.inspect}"
+    logger.debug "Query is valid: #{@query.valid?}"
 
-		@audits = @query
-			.order("#{Audit.table_name}.updated_on DESC")
-			.offset(@offset)
-			.limit(@limit)
-			.all
-	end
+    if @query.valid?
+      @project = Project.find(params[:project_id])
 
-	def new
-		@project = Project.find(params[:project_id])
-		@audit ||= Audit.new(params[:audit])
-		@available_auditors = @project.users.sort
-		#@available_watchers = @project.users.sort
-	end
+      # sort_init 'updated_on', 'desc'
+      # sort_update 'revision' => "#{Changeset.table_name}.revision",
+      #             'summary' => "#{Audit.table_name}.summary",
+      #             'status' => "#{Audit.table_name}.status",
+      #             'committed_on' => "#{Changeset.table_name}.committed_on",
+      #             'updated_on' => "#{Audit.table_name}.updated_on"
 
-	def create
-		@project = Project.find(params[:project_id])
+      # @query = @project.audits
 
-		revision = params[:revision]
+      # @limit = per_page_option
+      # @audit_count = @query.count
+      # @audit_pages = Paginator.new @audit_count, @limit, params['page']
+      # @offset ||= @audit_pages.offset
 
-		@audit = Audit.new(params[:audit])
-		@audit.project = @project
-		@audit.user = User.current
-		@audit.changeset = @project.repository.changesets.where("#{Changeset.table_name}.revision LIKE ?", "%#{revision}%").first
+      # @audits = @query
+      #   .includes(:changeset, :user)
+      #   .reorder(sort_clause)
+      #   .offset(@offset)
+      #   .limit(@limit)
+      #   .all
 
-		if @audit.save
-			unless params[:auditors_user_ids].nil?
-					params[:auditors_user_ids].each do |value|
-					@audit.add_auditor(User.find(value))
-					end
-			end
+      @limit = per_page_option
+      @audit_count = @query.audit_count
+      @audit_pages = Paginator.new @audit_count, @limit, params['page']
+      @offset ||= @audit_pages.offset
+      @audits = @query.audits(:order => sort_clause,
+                              :offset => @offset,
+                              :limit => @limit)
 
-			flash[:notice] = l(:notice_audit_successful_create, :id => view_context.link_to("##{@audit.id}", project_audit_path(@project, @audit)))
-			redirect_to project_audit_path(@project, @audit)
-			return
-		end
-	end
+      logger.debug "Audits: #{@audits.inspect}"
 
-	def show
-		@project = Project.find(params[:project_id])
-		@audit = Audit.find(params[:id])
-		@changeset = @audit.changeset
-		@repository = @changeset.repository
-		@comments = @audit.comments.all
-		@filechanges = @changeset.filechanges
+      respond_to do |format|
+        format.html { render :template => 'audits/index', :layout => !request.xhr? }
+        format.js
+      end
+    else
+      respond_to do |format|
+        format.html { render(:template => 'audits/index', :layout => !request.xhr?) }
+        format.js
+      end
+    end
+  end
 
-		for comment in @comments
-			comment.inline_comments.empty?
-		end
+  def new
+    @project = Project.find(params[:project_id])
 
-		@rev = 'master'
+    unless @project.repository
+      flash[:warning] = l(:notice_audit_no_repository_configured)
+    end
 
-		# Prepare diff with last revision
-		@diff = @repository.diff(nil, @changeset.revision, nil)
-		@diff_type = 'sbs'
-		@diff_format_revisions = @repository.diff_format_revisions(@changeset, nil)
-	end
+    @project = Project.find(params[:project_id])
+    @audit ||= Audit.new(params[:audit])
+    @available_auditors = @project.users.sort
+    #@available_watchers = @project.users.sort
+  end
 
-	def comment
-		@project = Project.find(params[:project_id])
-		@audit = Audit.find(params[:id])
+  def create
+    @project = Project.find(params[:project_id])
 
-		# Save comment
-		@comment = AuditComment.new(params[:audit])
-		@comment.audit = @audit
-		@comment.user = User.current
-		@audit.comments << @comment
+    unless @project.repository
+      flash[:warning] = l(:notice_audit_no_repository_configured)
+      redirect_to new_project_audit_path(@project, @audit)
+      return
+    end
 
-		# Save inline comments
-		unless params[:inline_comment].nil?
-			params[:inline_comment].each do |key, value|
-				@inline_comment = AuditCommentInline.new()
+    revision = params[:revision]
 
-				@inline_comment.change_id  = value[:change_id]
-				@inline_comment.line_begin = value[:line_begin]
-				@inline_comment.content    = value[:content]
+    @audit = Audit.new(params[:audit])
+    @audit.project = @project
+    @audit.user = User.current
+    @audit.status = Audit::STATUS_AUDIT_REQUESTED
 
-				if value[:line_begin] != value[:line_end]
-					@inline_comment.line_end = value[:line_end]
-				end
+    unless revision.empty?
+      @audit.changeset = @project.repository.changesets.where("#{Changeset.table_name}.revision LIKE ?", "%#{revision}%").first
+    end
 
-				@comment.inline_comments << @inline_comment
-			end
-		end
+    if @audit.save
+      unless params[:auditors_user_ids].nil?
+          params[:auditors_user_ids].each do |value|
+          @audit.add_auditor(User.find(value))
+          end
+      end
 
-		#if @comment.save
-		#  redirect_to project_audit_path(@project, @audit)
-		#  redirect_to trackers_path
-		#  return
-		#end
+      flash[:notice] = l(:notice_audit_successful_create, :id => view_context.link_to("##{@audit.id}", project_audit_path(@project, @audit)))
+      redirect_to project_audit_path(@project, @audit)
+      return
+    else
+      @available_auditors = @project.users.sort
 
-		redirect_to project_audit_path(@project, @audit)
+      render :action => 'new'
+    end
+  end
 
-		#show
-		#render :action => 'show'
-	end
+  def show
+    @project = Project.find(params[:project_id])
+    @audit = Audit.find(params[:id])
+    @changeset = @audit.changeset
+    @repository = @changeset.repository
+    @comments = @audit.comments.all
+    @filechanges = @changeset.filechanges
 
-	def edit
-		@project = Project.find(params[:project_id])
-		@audit = Audit.find(params[:id])
-		@available_auditors = @project.users.sort
-	end
+    for comment in @comments
+      comment.inline_comments.empty?
+    end
 
-	def update
-		@project = Project.find(params[:project_id])
-		@audit = Audit.find(params[:id])
+    @rev = 'master'
 
-		if @audit.update_attributes(params[:audit])
-			flash[:notice] = l(:notice_successful_update)
-			redirect_to project_audit_path(@project, @audit)
-			return
-		end
+    # Prepare diff with last revision
+    @diff = @repository.diff(nil, @changeset.revision, nil)
+    @diff_type = 'sbs'
+    @diff_format_revisions = @repository.diff_format_revisions(@changeset, nil)
+  end
 
-		edit
-		render :action => 'edit'
-	end
+  def comment
+    @project = Project.find(params[:project_id])
+    @audit = Audit.find(params[:id])
 
-	def destroy
-		@project = Project.find(params[:project_id])
-		@audit = Audit.find(params[:id])
-		@audit.destroy
+    # Update status
+    unless params[:audit_action] && params[:audit_action].empty?
+      @audit.status = params[:audit_action]
+      @audit.save
+    end
 
-		redirect_to project_audits_path(@project)
-	end
+    # Save comment
+    unless params[:audit_comment] && params[:audit_comment].empty?
+      @comment = AuditComment.new()
+      @comment.content = params[:audit_comment]
+      @comment.audit = @audit
+      @comment.user = User.current
+      @audit.comments << @comment
+    end
 
-	def changesets
-		@project = Project.find(params[:project_id])
+    # Save inline comments
+    unless params[:inline_comment].nil?
+      params[:inline_comment].each do |key, value|
+        @inline_comment = AuditCommentInline.new()
 
-		@changesets = []
-		q = (params[:q] || params[:term]).to_s.strip
-		if q.present?
-			@changesets += @project.repository.changesets.where("#{Changeset.table_name}.revision LIKE ?", "%#{q}%").order("#{Changeset.table_name}.committed_on DESC").limit(10).all
-			@changesets.compact!
-		end
+        @inline_comment.change_id  = value[:change_id]
+        @inline_comment.line_begin = value[:line_begin]
+        @inline_comment.content    = value[:content]
 
-		render :layout => false
-	rescue ActiveRecord::RecordNotFound
-		render_404
-	end
+        if value[:line_begin] != value[:line_end]
+          @inline_comment.line_end = value[:line_end]
+        end
+
+        @comment.inline_comments << @inline_comment
+      end
+    end
+
+    #if @comment.save
+    #  redirect_to project_audit_path(@project, @audit)
+    #  redirect_to trackers_path
+    #  return
+    #end
+
+    redirect_to project_audit_path(@project, @audit)
+
+    #show
+    #render :action => 'show'
+  end
+
+  def edit
+    @project = Project.find(params[:project_id])
+    @audit = Audit.find(params[:id])
+    @available_auditors = @project.users.sort
+  end
+
+  def update
+    @project = Project.find(params[:project_id])
+    @audit = Audit.find(params[:id])
+
+    if @audit.update_attributes(params[:audit])
+      flash[:notice] = l(:notice_successful_update)
+      redirect_to project_audit_path(@project, @audit)
+      return
+    end
+
+    edit
+    render :action => 'edit'
+  end
+
+  def destroy
+    @project = Project.find(params[:project_id])
+    @audit = Audit.find(params[:id])
+    @audit.destroy
+
+    redirect_to project_audits_path(@project)
+  end
+
+  def changesets
+    @project = Project.find(params[:project_id])
+
+    @changesets = []
+    q = (params[:q] || params[:term]).to_s.strip
+    if q.present?
+      @changesets += @project.repository.changesets.where("#{Changeset.table_name}.revision LIKE ?", "%#{q}%").order("#{Changeset.table_name}.committed_on DESC").limit(10).all
+      @changesets.compact!
+    end
+
+    render :layout => false
+  rescue ActiveRecord::RecordNotFound
+    render_404
+  end
 end

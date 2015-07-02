@@ -1,22 +1,22 @@
 <h2>
-	<%= link_to_audit(@audit, :text => l(:label_audit) + ' #' + @audit.id.to_s) %> » <%= l(:label_update_audit) %>
+  <%= link_to_audit(@audit, :text => l(:label_audit) + ' #' + @audit.id.to_s) %> » <%= l(:label_update_audit) %>
 </h2>
 
 <%= form_tag(edit_project_audit_path(@project, @audit), {:id => 'audit-form'}) do %>
-	<%= error_messages_for 'audit' %>
-	
-	<div class="box tabular">
-		<div id="all_attributes">
-			<%= labelled_fields_for :audit, @audit do |f| %>
-				<%= render :partial => 'form', :locals => { :f => f } %>
-			<% end %>
-		</div>
-	</div>
-	
-	<%= submit_tag l(:button_submit) %>
+  <%= error_messages_for 'audit' %>
+
+  <div class="box tabular">
+    <div id="all_attributes">
+      <%= labelled_fields_for :audit, @audit do |f| %>
+        <%= render :partial => 'form', :locals => { :f => f } %>
+      <% end %>
+    </div>
+  </div>
+
+  <%= submit_tag l(:button_submit) %>
 <% end %>
 
 <% content_for :header_tags do %>
-	<%= stylesheet_link_tag 'audit', :plugin => 'code_audit' %>
-	<%= javascript_include_tag 'audit', :plugin => 'code_audit' %>
+  <%= stylesheet_link_tag 'audit', :plugin => 'code_audit' %>
+  <%= javascript_include_tag 'audit', :plugin => 'code_audit' %>
 <% end %>

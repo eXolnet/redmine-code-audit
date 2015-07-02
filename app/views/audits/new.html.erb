@@ -1,25 +1,25 @@
 <h2><%= l(:label_audit_new) %></h2>
 
 <%= form_tag({:action => 'create'}, {:id => 'audit-form'}) do %>
-	<%= error_messages_for 'audit' %>
-	
-	<div class="box tabular">
-		<div id="all_attributes">
-			<%= labelled_fields_for :audit, @audit do |f| %>
-				<p>
-					<label for="audit_revision"><%= l(:label_revision) %><span class="required"> *</span></label>
-					<input type="text" id="audit_revision" name="revision" />
-				</p>
-			
-				<%= render :partial => 'form', :locals => { :f => f } %>
-			<% end %>
-		</div>
-	</div>
-	
-	<%= submit_tag l(:button_create) %>
+  <%= error_messages_for 'audit' %>
+
+  <div class="box tabular">
+    <div id="all_attributes">
+      <%= labelled_fields_for :audit, @audit do |f| %>
+        <p>
+          <label for="audit_revision"><%= l(:label_revision) %><span class="required"> *</span></label>
+          <input type="text" id="audit_revision" name="revision" />
+        </p>
+
+        <%= render :partial => 'form', :locals => { :f => f } %>
+      <% end %>
+    </div>
+  </div>
+
+  <%= submit_tag l(:button_create) %>
 <% end %>
 
 <% content_for :header_tags do %>
-	<%= stylesheet_link_tag 'audit', :plugin => 'code_audit' %>
-	<%= javascript_include_tag 'audit', :plugin => 'code_audit' %>
+  <%= stylesheet_link_tag 'audit', :plugin => 'code_audit' %>
+  <%= javascript_include_tag 'audit', :plugin => 'code_audit' %>
 <% end %>

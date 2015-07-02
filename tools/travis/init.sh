@@ -4,13 +4,8 @@ if [[ ! "$WORKSPACE" = /* ]] ||
    [[ ! "$PATH_TO_PLUGIN" = /* ]] ||
    [[ ! "$PATH_TO_REDMINE" = /* ]];
 then
-  echo "You should set"\
-       " WORKSPACE, PATH_TO_PLUGIN, PATH_TO_REDMINE"\
-       " environment variables"
-  echo "You set:"\
-       "$WORKSPACE"\
-       "$PATH_TO_PLUGIN"\
-       "$PATH_TO_REDMINE"
+  echo "You should set WORKSPACE, PATH_TO_PLUGIN, PATH_TO_REDMINE environment variables"
+  echo "You set: $WORKSPACE, $PATH_TO_PLUGIN, $PATH_TO_REDMINE"
   exit 1;
 fi
 
@@ -92,11 +87,13 @@ run_install() {
     export TRACE=--trace
   fi
 
-  cp $PATH_TO_PLUGINS/$PLUGIN/.travis-database.yml config/database.yml
+  PATH_TO_DATABASE_CONFIG_FILE=${PATH_TO_DATABASE_CONFIG_FILE:=tools/travis/database.yml}
+
+  cp $PATH_TO_PLUGIN/$PATH_TO_DATABASE_CONFIG_FILE config/database.yml
 
   # install gems
   mkdir -p vendor/bundle
-  bundle install --path vendor/bundle
+  bundle install --path vendor/bundle --without rmagick
 
   bundle exec rake db:migrate $TRACE
   bundle exec rake redmine:load_default_data REDMINE_LANG=en $TRACE

@@ -1,0 +1,10 @@
+<%= "Audit ##{audit.id}: #{audit.summary}" %>
+<%= audit_url %>
+
+* <%= l(:label_submitted_on) %>: <%= format_time(audit.created_on) %>
+* <%= l(:label_submitter) %>: <%= audit.user %>
+* <%= l(:label_revision) %>: <%= changeset.revision %>
+* <%= l(:label_committed_on) %>: <%= format_time(changeset.committed_on) %>
+* <%= l(:label_committer) %>: <%= changeset.author %>
+----------------------------------------
+audit.details

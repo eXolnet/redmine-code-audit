@@ -2,7 +2,7 @@
 # See: http://guides.rubyonrails.org/routing.html
 
 resources :projects do
-        resources :audits
+  resources :audits
 end
 
 get '/projects/:project_id/audits', :to => 'audits#index'

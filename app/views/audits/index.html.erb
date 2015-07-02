@@ -4,45 +4,57 @@
 
 <h2><%= l(:label_audits) %></h2>
 
-<% if ( ! @audits.empty?) %>
-	<table class="list list-audits">
-		<thead>
-			<tr>
-				<th><%= l(:label_revision) %></th>
-				<th><%= l(:label_summary) %></th>
-				<th><%= l(:label_commiter) %></th>
-				<th><%= l(:label_commited_on) %></th>
-				<th><%= l(:label_submitter) %></th>
-				<th><%= l(:label_updated_on) %></th>
-			</tr>
-		</thead>
-		
-		<tbody>
-			<% for audit in @audits %>
-				<tr class="<%= cycle("odd", "even") %>">
-					<td class="revision"><%= link_to_revision(audit.changeset, audit.changeset.repository) %></td>
-					<td class="subject"><%= link_to_audit(audit) %></td>
-					<td class="commiter"><%= h audit.changeset.author %></td>
-					<td class="commited_on"><%= format_time(audit.changeset.committed_on) %></td>
-					<td class="submitter">
-						<% if ! audit.user.nil? %>
-							<%= link_to_user(audit.user) %>
-						<% else %>
-							<%= h truncate(audit.changeset.author.to_s, :length => 30) %>
-						<% end %>
-					</td>
-					<td class="updated_on"><%= format_time(audit.updated_on) %></td>
-				</tr>
-			<% end %>
-		</tbody>
-	</table>
-	
-	<p class="pagination"><%= pagination_links_full @audit_pages, @audit_count %></p>
-<% else %>
-	<p class="nodata"><%= l(:label_no_data) %></p>
+<%= render :partial => 'audits/query' %>
+
+<% if @query.valid? %>
+  <% if ! @audits.empty? %>
+    <table class="list list-audits">
+      <thead>
+        <tr>
+          <% @query.inline_columns.each do |column| %>
+            <%= column_header(column) %>
+          <% end %>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% for audit in @audits %>
+          <tr id="audit-<%= audit.id %>" class="<%= cycle("odd", "even") %>">
+            <% @query.inline_columns.each do |column| %>
+              <td class="<%= column.css_classes %>">
+                <%=
+                if column.name == :revision
+                  link_to_revision(audit.changeset, audit.changeset.repository)
+                elsif column.name == :summary
+                  link_to_audit(audit)
+                elsif column.name == :status
+                  column_value(column, audit, audit.status_label)
+                elsif column.name == :committer
+                  column_value(column, audit, audit.changeset.author)
+                elsif column.name == :committed_on
+                  column_value(column, audit, audit.changeset.committed_on)
+                else
+                  column_content(column, audit)
+                end
+                =%>
+              </td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <p class="pagination"><%= pagination_links_full @audit_pages, @audit_count %></p>
+  <% else %>
+    <p class="nodata"><%= l(:label_no_data) %></p>
+  <% end %>
 <% end %>
 
 <% content_for :header_tags do %>
-	<%= stylesheet_link_tag 'audit', :plugin => 'code_audit' %>
-	<%= javascript_include_tag 'audit', :plugin => 'code_audit' %>
+  <%= stylesheet_link_tag 'audit', :plugin => 'code_audit' %>
+  <%= javascript_include_tag 'audit', :plugin => 'code_audit' %>
+<% end %>
+
+<% content_for :sidebar do %>
+    <%= render :partial => 'audits/sidebar' %>
 <% end %>
