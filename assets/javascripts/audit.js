@@ -285,7 +285,9 @@ $(document).ready(function() {
   });
 
   // Create existing inline comments
-  $('.inline-summary-content').each(function() {
+  // Insert in reverse because we append to the target line, which would make newer comment go on top of older one
+  // instead of the opposite (older at the top, newer at the bottom).
+  $.each($('.inline-summary-content').get().reverse(), function() {
     var $this = $(this),
       path = $this.data('path'),
       audit_comment = $this.parents('.audit_comment'),
