@@ -25,11 +25,11 @@
 <% end -%>
 <tr>
   <th class="line-num line-num-left" data-line="<%= line.nb_line_left %>"><%= line.nb_line_left %></th>
-  <td class="line-code <%= line.type_diff_left %>">
+  <td class="line-code line-code-left <%= line.type_diff_left %>">
     <pre><%= line.html_line_left.html_safe %></pre>
   </td>
   <th class="line-num line-num-right" data-line="<%= line.nb_line_right %>"><%= line.nb_line_right %></th>
-  <td class="line-code <%= line.type_diff_right %>">
+  <td class="line-code line-code-right <%= line.type_diff_right %>">
     <pre><%= line.html_line_right.html_safe %></pre>
   </td>
 </tr>
