@@ -112,6 +112,11 @@ div.audit .attributes th {
   float: right;
 }
 
+.inline-comment-links {
+  float: right;
+  margin-left: 10px;
+}
+
 .audit-buttons {
   margin-left: 177px;
 }

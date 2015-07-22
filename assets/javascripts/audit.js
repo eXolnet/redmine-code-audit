@@ -200,6 +200,7 @@ $(document).ready(function() {
     return '<div class="inline-comment" data-line-begin="' + line_begin + '" data-line-end="' + line_end + '">' +
       '<div class="inline-comment-header">' +
         '<span class="inline-comment-title">' + title + '</span>' +
+        '<span class="inline-comment-links">Previous · Next · Reply · Edit · Delete</span>'+
         '<span class="inline-comment-line">Line ' + line_begin + (line_begin != line_end ? '-'+line_end : '') + '</span>' +
       '</div>' +
       comment +
