@@ -127,8 +127,8 @@ $(document).ready(function() {
         overlay.remove();
         td.empty();
 
-        // On ne permet pas l'ajout de commentaires vides
-        if (comment == "") {
+        // Do not allow the creation of empty comments
+        if (comment === '') {
           return;
         }
 
@@ -136,13 +136,7 @@ $(document).ready(function() {
           line_end   = comment_line_end.prev().text(),
           change_id  = AuditHelper.change_id(row.closest('table'));
 
-        td.append('<div class="inline-comment inline-comment-draft" data-line-begin="' + line_begin + '" data-line-end="' + line_end + '">' +
-            '<div class="inline-comment-header">' +
-              '<span class="inline-comment-title">' + $('#comment_user_name').val() + ' (Draft)</span>' +
-              '<span class="inline-comment-line">Line ' + line_begin + (line_begin != line_end ? '-'+line_end : '') + '</span>' +
-            '</div>' +
-            comment +
-          '</div>');
+        td.append(draftComment(line_begin, line_end, comment));
 
         td.append('<input type="hidden" name="inline_comment[' + comment_index + '][line_begin]" value="' + line_begin + '" />');
         td.append('<input type="hidden" name="inline_comment[' + comment_index + '][line_end]" value="' + line_end + '" />');
@@ -156,6 +150,16 @@ $(document).ready(function() {
 
       textarea.focus();
     });
+
+  var draftComment = function(line_begin, line_end, comment) {
+    return '<div class="inline-comment inline-comment-draft" data-line-begin="' + line_begin + '" data-line-end="' + line_end + '">' +
+      '<div class="inline-comment-header">' +
+        '<span class="inline-comment-title">' + $('#comment_user_name').val() + ' (Draft)</span>' +
+        '<span class="inline-comment-line">Line ' + line_begin + (line_begin != line_end ? '-'+line_end : '') + '</span>' +
+      '</div>' +
+      comment +
+    '</div>';
+  };
 
   $('.audit-change').click(function() {
     var $table = AuditHelper.table($(this).closest('td').next().text())
@@ -192,30 +196,35 @@ $(document).ready(function() {
     }
   });
 
-  // Création des inline comments déjà créés
+  var existingComment = function(line_begin, line_end, title, comment) {
+    return '<div class="inline-comment" data-line-begin="' + line_begin + '" data-line-end="' + line_end + '">' +
+      '<div class="inline-comment-header">' +
+        '<span class="inline-comment-title">' + title + '</span>' +
+        '<span class="inline-comment-line">Line ' + line_begin + (line_begin != line_end ? '-'+line_end : '') + '</span>' +
+      '</div>' +
+      comment +
+    '</div>';
+  }
+
+  // Create existing inline comments
   $('.inline-summary-content').each(function() {
     var $this = $(this),
       path = $this.data('path'),
       audit_comment = $this.parents('.audit_comment'),
       line_begin = $this.data('line-begin'),
-      line_end = $this.data('line-end') != "" ? $this.data('line-end') : line_begin;
+      line_end = $this.data('line-end') !== '' ? $this.data('line-end') : line_begin;
 
     var $row = AuditHelper.row(path, line_end);
 
     var tr = $('<tr><th class="line-num line-num-left" /><td /><th class="line-num line-num-right" /><td class="line-comment" /></tr>'),
       td = tr.find('.line-comment');
 
-    td.append('<div class="inline-comment" data-line-begin="' + line_begin + '" data-line-end="' + line_end + '">' +
-            '<div class="inline-comment-header">' +
-              '<span class="inline-comment-title">' + audit_comment.find('.title').html() + '</span>' +
-              '<span class="inline-comment-line">Line ' + line_begin + (line_begin != line_end ? '-'+line_end : '') + '</span>' +
-            '</div>' +
-            $this.html() +
-          '</div>');
+    td.append(existingComment(line_begin, line_end, audit_comment.find('.title').html(), $this.html()));
 
     $row.after(tr);
   });
 
+  // Scrolls to the diff
   $('.inline-line-number').click(function() {
     var $this = $(this),
       path = $this.data('path'),
