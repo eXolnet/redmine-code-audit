@@ -1,59 +1,32 @@
 var AuditHelper = {
   // TODO: Load the changes as an object here instead of querying the DOM
+
+  // Returns the DOM diff table (lines + text) for a specified path
   table: function(path) {
-    var target_path = $.trim(path),
-      table = null;
-
-    $('.filecontent').each(function() {
-      var $this = $(this),
-        path = $.trim($this.find('.filename').text());
-
-      if (path == target_path) {
-        table = $this;
-      }
-    });
-
-    return table;
+    return $('.filecontent[data-path="' + path + '"]').first();
   },
 
+  // Returns the DOM row for a path and line number
   row: function(path, line_number) {
-    var $table = typeof path === 'string' ?  AuditHelper.table(path) : path,
-      $row = null;
+    var $table = typeof path === 'string' ? AuditHelper.table(path) : path;
 
-    $table
-      .find('.line-num:nth-child(3)')
-      .each(function() {
-        if ($(this).text() == line_number) {
-          $row = $(this).closest('tr');
-        }
-      });
-
-    return $row;
+    return $table.find('.line-num-right[data-line="' + line_number + '"]').first().parent();
   },
 
+  // Returns the path associated to a diff table
   path: function(table) {
-    var filename = $.trim(table.find('.filename').text()),
-      firstSpace = filename.indexOf(' ');
-
-    if (firstSpace !== -1) {
-      filename = filename.substr(0, firstSpace - 1);
-    }
-
-    return $.trim(filename);
+    return table.data('path');
   },
 
   change_id: function(path) {
     var change_id = null;
+    path = path !== 'string' ? AuditHelper.path(path) : path;
 
-    if (typeof path !== 'string') {
-      path = AuditHelper.path(path);
+    var change = $('.list-audit-changes [data-path="' + path + '"]').first();
+
+    if (change) {
+      return change.data('change-id');
     }
-
-    $('.list-audit-changes tbody tr').each(function() {
-      if ($(this).children('td:nth-child(4)').text() === path) {
-        change_id = $(this).attr('data-change-id');
-      }
-    });
 
     return change_id;
   }
@@ -101,30 +74,29 @@ $(document).ready(function() {
           return ! isNaN(parseFloat($(this).text()));
         })
         .mouseenter(function() {
-          line2 = $(this).next(),
-          offset2 = line2.offset();
+          var line2 = $(this).next();
+          var offset2 = line2.offset();
+          var minOffset = offset;
+          var maxOffset = offset;
 
           if (offset.top < offset2.top) {
-            overlay
-              .css(offset)
-              .css({
-                width: line.outerWidth(),
-                height: offset2.top - offset.top + line2.outerHeight()
-              });
-
+            minOffset = offset;
+            maxOffset = offset2;
             comment_line_begin = line;
             comment_line_end   = line2;
           } else {
-            overlay
-              .css(offset2)
-              .css({
-                width: line.outerWidth(),
-                height: offset.top - offset2.top + line.outerHeight()
-              });
-
+            minOffset = offset2;
+            maxOffset = offset;
             comment_line_begin = line2;
             comment_line_end   = line;
           }
+
+          overlay
+            .css(minOffset)
+            .css({
+              width: line.outerWidth(),
+              height: maxOffset.top - minOffset.top + comment_line_end.outerHeight()
+            });
         });
     })
     .mouseup(function() {
@@ -197,8 +169,8 @@ $(document).ready(function() {
   $(document).on('mouseover', '.inline-comment', function() {
     var $this = $(this),
       $table = $this.closest('table'),
-      $row_begin = AuditHelper.row($table, $this.attr('data-line-begin')),
-      $row_end = AuditHelper.row($table, $this.attr('data-line-end')),
+      $row_begin = AuditHelper.row($table, $this.data('line-begin')),
+      $row_end = AuditHelper.row($table, $this.data('line-end')),
       $line_begin = $row_begin.find('td:nth-child(4)'),
       $line_end= $row_end.find('td:nth-child(4)');
 
@@ -223,15 +195,15 @@ $(document).ready(function() {
   // Création des inline comments déjà créés
   $('.inline-summary-content').each(function() {
     var $this = $(this),
-      path = $this.attr('data-path'),
+      path = $this.data('path'),
       audit_comment = $this.parents('.audit_comment'),
-      line_begin = $this.attr('data-line-begin'),
-      line_end = $this.attr('data-line-end') != "" ? $this.attr('data-line-end') : line_begin;
+      line_begin = $this.data('line-begin'),
+      line_end = $this.data('line-end') != "" ? $this.data('line-end') : line_begin;
 
     var $row = AuditHelper.row(path, line_end);
 
-    var tr = $('<tr><th class="line-num" /><td class="line-comment" /><th class="line-num" /><td class="line-comment" /></tr>'),
-      td = tr.find('td:nth-child(4)');
+    var tr = $('<tr><th class="line-num line-num-left" /><td /><th class="line-num line-num-right" /><td class="line-comment" /></tr>'),
+      td = tr.find('.line-comment');
 
     td.append('<div class="inline-comment" data-line-begin="' + line_begin + '" data-line-end="' + line_end + '">' +
             '<div class="inline-comment-header">' +
@@ -246,8 +218,8 @@ $(document).ready(function() {
 
   $('.inline-line-number').click(function() {
     var $this = $(this),
-      path = $this.attr('data-path'),
-      line = $this.attr('data-line');
+      path = $this.data('path'),
+      line = $this.data('line');
 
     var $row = AuditHelper.row(path, line);
     $(document.body).animate({scrollTop: ($row.offset().top - 10) }, 500,'easeInOutCubic');

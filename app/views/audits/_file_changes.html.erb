@@ -10,7 +10,7 @@
   </thead>
   <tbody>
     <% for change in @filechanges %>
-      <tr class="<%= cycle("odd", "even") %>" data-change-id="<%= change.id %>">
+      <tr class="<%= cycle("odd", "even") %>" data-change-id="<%= change.id %>" data-path="<%= change.path %>">
         <td class="text-center"><%= link_to l(:label_history), {:controller => 'repositories', :action => 'changes', :id => @project.id, :repository_id => @repository.identifier_param, :path => to_path_param(change.path), :rev => @rev } %></td>
         <td class="text-center"><%= link_to l(:button_view), {:controller => 'repositories', :action => 'entry', :id => @project.id, :repository_id => @repository.identifier_param, :path => to_path_param(change.path), :rev => @rev } %></td>
         <td class="text-center">
