@@ -10,7 +10,7 @@
 <thead>
 <tr>
   <th colspan="4" class="filename">
-    <%= table_file.file_name %>&nbsp;
+    <span data-path="<%= table_file.file_name %>"><%= table_file.file_name %></span>&nbsp;
     <%= link_to l(:button_view), {:controller => 'repositories', :action => 'entry', :id => @project.id, :repository_id => @repository.identifier_param, :path => to_path_param(table_file.file_name), :rev => @rev } %>&nbsp;
     <%= link_to l(:label_history), {:controller => 'repositories', :action => 'changes', :id => @project.id, :repository_id => @repository.identifier_param, :path => to_path_param(table_file.file_name), :rev => @rev } %>
   </th>
@@ -24,11 +24,11 @@
 </tr>
 <% end -%>
 <tr>
-  <th class="line-num"><%= line.nb_line_left %></th>
+  <th class="line-num line-num-left"><%= line.nb_line_left %></th>
   <td class="line-code <%= line.type_diff_left %>">
     <pre><%= line.html_line_left.html_safe %></pre>
   </td>
-  <th class="line-num"><%= line.nb_line_right %></th>
+  <th class="line-num line-num-right"><%= line.nb_line_right %></th>
   <td class="line-code <%= line.type_diff_right %>">
     <pre><%= line.html_line_right.html_safe %></pre>
   </td>

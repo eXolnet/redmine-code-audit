@@ -1,4 +1,5 @@
 var AuditHelper = {
+  // TODO: Load the changes as an object here instead of querying the DOM
   table: function(path) {
     var target_path = $.trim(path),
       table = null;
@@ -16,7 +17,7 @@ var AuditHelper = {
   },
 
   row: function(path, line_number) {
-    var $table = typeof path == 'string' ?  AuditHelper.table(path) : path,
+    var $table = typeof path === 'string' ?  AuditHelper.table(path) : path,
       $row = null;
 
     $table
@@ -42,14 +43,14 @@ var AuditHelper = {
   },
 
   change_id: function(path) {
-    if (typeof path != 'string') {
+    var change_id = null;
+
+    if (typeof path !== 'string') {
       path = AuditHelper.path(path);
     }
 
-    change_id = null;
-
     $('.list-audit-changes tbody tr').each(function() {
-      if ($(this).children('td:nth-child(4)').text() == path) {
+      if ($(this).children('td:nth-child(4)').text() === path) {
         change_id = $(this).attr('data-change-id');
       }
     });
@@ -59,10 +60,9 @@ var AuditHelper = {
 };
 
 $(document).ready(function() {
-  var nums = $('.line-num:nth-child(3)').filter(function() {
+  var nums = $('.line-num-right').filter(function() {
     return ! isNaN(parseFloat($(this).text()));
   });
-
 
   var comment_line_begin,
     comment_line_end,
@@ -185,8 +185,6 @@ $(document).ready(function() {
       textarea.focus();
     });
 
-
-
   $('.audit-change').click(function() {
     var $table = AuditHelper.table($(this).closest('td').next().text())
     $(document.body).animate({scrollTop: ($table.offset().top - 10) }, 500,'easeInOutCubic');
@@ -222,7 +220,6 @@ $(document).ready(function() {
     }
   });
 
-
   // Création des inline comments déjà créés
   $('.inline-summary-content').each(function() {
     var $this = $(this),
@@ -246,7 +243,6 @@ $(document).ready(function() {
 
     $row.after(tr);
   });
-
 
   $('.inline-line-number').click(function() {
     var $this = $(this),
