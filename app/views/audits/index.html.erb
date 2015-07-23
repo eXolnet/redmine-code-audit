@@ -23,7 +23,9 @@
             <% @query.inline_columns.each do |column| %>
               <td class="<%= column.css_classes %>">
                 <%=
-                if column.name == :revision
+                if column.name == :id
+                  link_to_audit(audit, :text => audit.id)
+                elsif column.name == :revision
                   link_to_revision(audit.changeset, audit.changeset.repository)
                 elsif column.name == :summary
                   link_to_audit(audit)
