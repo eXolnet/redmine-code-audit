@@ -88,14 +88,13 @@ class AuditQuery < Query
   def audits(options={})
     order_option = [group_by_sort_order, options[:order]].flatten.reject(&:blank?)
 
-    audits = Audit.where(options[:conditions]).all(
-      :include => [:project, :changeset, :user],
-      :conditions => statement,
-      :order => order_option,
-      :joins => joins_for_order_statement(order_option.join(',')),
-      :limit  => options[:limit],
-      :offset => options[:offset]
-    )
+    audits = Audit
+      .joins(joins_for_order_statement(order_option.join(',')))
+      .eager_load([:project, :changeset, :user])
+      .where(options[:conditions])
+      .order(order_option)
+      .limit(options[:limit])
+      .offset(options[:offset])
 
     audits
   rescue ::ActiveRecord::StatementInvalid => e
