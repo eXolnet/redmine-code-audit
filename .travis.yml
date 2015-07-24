@@ -1,14 +1,12 @@
 language: ruby
 rvm:
-  - 2.0.0
   - 1.9.3
-branches:
-  only:
-    - master
-    - develop
+  - 2.0
+  - 2.1
+  - 2.2
 env:
-  - REDMINE_VERSION=2.5.1 VERBOSE=yes
-  - REDMINE_VERSION=2.6.2 VERBOSE=yes
+  - REDMINE_VERSION=2.6.6 VERBOSE=yes
+  - REDMINE_VERSION=3.0.4 VERBOSE=yes
 script:
   - export PLUGIN=code_audit
   - export WORKSPACE=$(pwd)/workspace
