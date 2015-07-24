@@ -62,15 +62,12 @@ class AuditsController < ApplicationController
       return
     end
 
-    revision = params[:revision]
-
     @audit = Audit.new(params[:audit])
     @audit.project = @project
     @audit.user = User.current
     @audit.status = Audit::STATUS_AUDIT_REQUESTED
+    @audit.revision = params[:revision]
 
-    unless revision.empty?
-      @audit.changeset = @project.repository.changesets.where("#{Changeset.table_name}.revision LIKE ?", "%#{revision}%").first
     end
 
     if @audit.save

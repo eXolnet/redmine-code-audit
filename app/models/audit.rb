@@ -55,6 +55,16 @@ class Audit < ActiveRecord::Base
     l("status_#{status}")
   end
 
+  def revision
+    self.changeset.revision if self.changeset
+  end
+
+  def revision=(revision)
+    if self.project && self.project.repository
+      self.changeset = self.project.repository.changesets.where("#{Changeset.table_name}.revision LIKE ?", "%#{revision}%").first
+    end
+  end
+
   def add_auditor(user)
     self.auditors << AuditAuditor.new(:user => user)
   end
