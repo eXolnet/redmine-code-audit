@@ -1,4 +1,6 @@
 class Audit < ActiveRecord::Base
+  include Redmine::SafeAttributes
+
   # Audit statuses
   STATUS_NONE               = '';
   STATUS_AUDIT_NOT_REQUIRED = 'audit_not_required';
@@ -19,9 +21,12 @@ class Audit < ActiveRecord::Base
   has_many :auditors, :class_name => 'AuditAuditor', :dependent => :delete_all
   has_many :auditor_users, :through => :auditors, :source => :user, :validate => false
 
+  safe_attributes 'summary', 'details', 'status', 'revision'
+  safe_attributes 'auditor_user_ids', :if => lambda {|audit, user| audit.new_record?}
+
   acts_as_watchable
 
-  validates_presence_of :summary, :project, :user, :changeset
+  validates_presence_of :summary, :project, :user, :revision
   validates_length_of :summary, :maximum => 255
 
   after_save :send_notification
@@ -37,6 +42,13 @@ class Audit < ActiveRecord::Base
       STATUS_CLOSED             => l('status_closed'),
       STATUS_CC                 => l('status_cc'),
     }
+  end
+
+  def initialize(attributes=nil, *args)
+    super
+    if new_record?
+      self.auditor_user_ids = []
+    end
   end
 
   def author
@@ -59,9 +71,11 @@ class Audit < ActiveRecord::Base
     self.changeset.revision if self.changeset
   end
 
-  def revision=(revision)
-    if self.project && self.project.repository
-      self.changeset = self.project.repository.changesets.where("#{Changeset.table_name}.revision LIKE ?", "%#{revision}%").first
+  def revision=(hash)
+    if self.project && self.project.repository && ! hash.nil? && ! hash.empty?
+      self.changeset = self.project.repository.changesets.where("#{Changeset.table_name}.revision LIKE ?", "%#{hash}%").first
+    else
+      self.changeset = nil
     end
   end
 
@@ -76,10 +90,6 @@ class Audit < ActiveRecord::Base
 
   def set_auditor(user, auditing=true)
     auditing ? add_auditor(user) : remove_auditor(user)
-  end
-
-  def auditor_user_ids
-    self.auditors.pluck(:user_id)
   end
 
   def audited_by?(user)

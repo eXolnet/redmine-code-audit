@@ -20,7 +20,7 @@
     <%=
 
     @available_auditors.map do |user|
-      tag = check_box_tag 'auditors_user_ids[]', user.id, @audit.audited_by?(user), :id => nil
+      tag = check_box_tag 'audit[auditor_user_ids][]', user.id, @audit.audited_by?(user), :id => nil
       content_tag 'label', "#{tag} #{h(user)}".html_safe,
             :id => "audit_auditors_user_ids_#{user.id}",
             :class => "floating"

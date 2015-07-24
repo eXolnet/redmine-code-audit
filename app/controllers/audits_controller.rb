@@ -62,21 +62,13 @@ class AuditsController < ApplicationController
       return
     end
 
-    @audit = Audit.new(params[:audit])
+    @audit = Audit.new
     @audit.project = @project
     @audit.user = User.current
     @audit.status = Audit::STATUS_AUDIT_REQUESTED
-    @audit.revision = params[:revision]
-
-    end
+    @audit.safe_attributes = params[:audit]
 
     if @audit.save
-      unless params[:auditors_user_ids].nil?
-        params[:auditors_user_ids].each do |value|
-          @audit.add_auditor(User.find(value))
-        end
-      end
-
       flash[:notice] = l(:notice_audit_successful_create, :id => view_context.link_to("##{@audit.id}", project_audit_path(@project, @audit)))
       redirect_to project_audit_path(@project, @audit)
       return
