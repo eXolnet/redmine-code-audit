@@ -31,7 +31,14 @@ var AuditHelper = {
   },
 
   path: function(table) {
-    return $.trim(table.find('.filename').text());
+    var filename = $.trim(table.find('.filename').text()),
+      firstSpace = filename.indexOf(' ');
+
+    if (firstSpace !== -1) {
+      filename = filename.substr(0, firstSpace - 1);
+    }
+
+    return $.trim(filename);
   },
 
   change_id: function(path) {
