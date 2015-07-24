@@ -147,13 +147,11 @@ class AuditsController < ApplicationController
     end
 
     # Save comment
-    unless params[:audit_comment] && params[:audit_comment].empty?
-      @comment = AuditComment.new()
-      @comment.content = params[:audit_comment]
-      @comment.audit = @audit
-      @comment.user = User.current
-      @audit.comments << @comment
-    end
+    @comment = AuditComment.new()
+    @comment.content = params[:audit_comment]
+    @comment.audit = @audit
+    @comment.user = User.current
+    @audit.comments << @comment
 
     # Save inline comments
     unless params[:inline_comment].nil?
