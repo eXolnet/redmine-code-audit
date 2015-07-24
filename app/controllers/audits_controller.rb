@@ -17,32 +17,8 @@ class AuditsController < ApplicationController
     sort_update(@query.sortable_columns)
     @query.sort_criteria = sort_criteria.to_a
 
-    logger.debug "Query: #{@query.inspect}"
-    logger.debug "Query is valid: #{@query.valid?}"
-
     if @query.valid?
       @project = Project.find(params[:project_id])
-
-      # sort_init 'updated_on', 'desc'
-      # sort_update 'revision' => "#{Changeset.table_name}.revision",
-      #             'summary' => "#{Audit.table_name}.summary",
-      #             'status' => "#{Audit.table_name}.status",
-      #             'committed_on' => "#{Changeset.table_name}.committed_on",
-      #             'updated_on' => "#{Audit.table_name}.updated_on"
-
-      # @query = @project.audits
-
-      # @limit = per_page_option
-      # @audit_count = @query.count
-      # @audit_pages = Paginator.new @audit_count, @limit, params['page']
-      # @offset ||= @audit_pages.offset
-
-      # @audits = @query
-      #   .includes(:changeset, :user)
-      #   .reorder(sort_clause)
-      #   .offset(@offset)
-      #   .limit(@limit)
-      #   .all
 
       @limit = per_page_option
       @audit_count = @query.audit_count
@@ -51,8 +27,6 @@ class AuditsController < ApplicationController
       @audits = @query.audits(:order => sort_clause,
                               :offset => @offset,
                               :limit => @limit)
-
-      logger.debug "Audits: #{@audits.inspect}"
 
       respond_to do |format|
         format.html { render :template => 'audits/index', :layout => !request.xhr? }
@@ -101,9 +75,9 @@ class AuditsController < ApplicationController
 
     if @audit.save
       unless params[:auditors_user_ids].nil?
-          params[:auditors_user_ids].each do |value|
+        params[:auditors_user_ids].each do |value|
           @audit.add_auditor(User.find(value))
-          end
+        end
       end
 
       flash[:notice] = l(:notice_audit_successful_create, :id => view_context.link_to("##{@audit.id}", project_audit_path(@project, @audit)))

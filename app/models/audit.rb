@@ -68,6 +68,14 @@ class Audit < ActiveRecord::Base
     auditing ? add_auditor(user) : remove_auditor(user)
   end
 
+  def auditor_user_ids
+    self.auditors.pluck(:user_id)
+  end
+
+  def audited_by?(user)
+    !!(user && self.auditor_user_ids.detect {|uid| uid == user.id })
+  end
+
   # Returns the users that should be notified
   def notified_users
     notified = []
