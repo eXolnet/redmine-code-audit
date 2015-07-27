@@ -151,6 +151,7 @@ $(document).ready(function() {
       var td = tr.find('.line-comment'),
         comment = textarea.val();
 
+      writingInlineComment = false;
       destroyOverlay(overlay);
       td.empty();
 
@@ -167,7 +168,7 @@ $(document).ready(function() {
       td.append('<input type="hidden" name="inline_comment[' + comment_index + '][content]" value="' + comment + '" />');
 
       comment_index += 1;
-      writingInlineComment = false;
+      
     });
 
     row.after(tr);
