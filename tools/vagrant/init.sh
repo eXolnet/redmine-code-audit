@@ -49,6 +49,8 @@ update-rc.d thin defaults
 ################################################################################
 
 # Configure thin.
+mkdir -p /etc/thin
+
 thin config \
 --config /etc/thin/redmine.yml \
 --chdir "$PATH_TO_REDMINE" \
