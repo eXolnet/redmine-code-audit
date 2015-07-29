@@ -155,6 +155,10 @@ class AuditsController < ApplicationController
     @project = Project.find(params[:project_id])
     @audit = Audit.find(params[:id])
 
+    # Reset the auditor_user_ids to uncheck selected auditors that
+    # are not checked anymore
+    @audit.auditor_user_ids = []
+
     if @audit.update_attributes(params[:audit])
       flash[:notice] = l(:notice_successful_update)
       redirect_to project_audit_path(@project, @audit)
