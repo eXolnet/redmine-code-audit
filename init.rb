@@ -4,13 +4,14 @@ require 'redmine'
 if Rails::VERSION::MAJOR < 3
   require 'dispatcher'
   object_to_prepare = Dispatcher
-else
+elsif Rails::VERSION::MAJOR == 3
   object_to_prepare = Rails.configuration
+else
+  object_to_prepare = ActionDispatch::Callbacks
 end
 
 object_to_prepare.to_prepare do
   require_dependency 'code_audit/patches/application_helper_patch'
-  require_dependency 'code_audit/patches/project_patch'
   require_dependency 'code_audit/patches/changeset_patch'
   require_dependency 'code_audit/patches/mailer_patch'
 
