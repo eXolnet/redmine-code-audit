@@ -30,7 +30,8 @@ fr:
   label_reviewed_time_by: 'Revu par %{author} il y %{age}'
   notice_audit_successful_create: "L'audit %{id} a été créé."
   notice_audit_no_repository_configured: "Vous n'avez aucun entrepôt de configurer pour ce projet."
-  text_issue_added: "L'audit #%{id} a été créé par %{author}."
+  text_audit_added: "L'audit #%{id} a été créé par %{author}."
+  text_audit_comment_added: "L'audit #%{id} a été commenté par %{auditor}."
   status_: Aucun
   status_audit_not_required: Audit non requis
   status_audit_required: Audit requis
@@ -43,3 +44,8 @@ fr:
   field_revision: Révision
   field_committer: Réviseur
   field_committed_on: Révision le
+  label_open_audits: Audits ouverts
+  label_need_attention: À surveiller
+  label_problem_audits: Audits problématiques
+  label_authored: Mes audits
+  label_all_audits: Tous les audits

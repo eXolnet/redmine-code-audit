@@ -1,6 +1,7 @@
 <h1><%= link_to(h("Audit ##{audit.id}: #{audit.summary}"), audit_url) %></h1>
 
 <ul>
+<li><%= l(:label_status) %>: <%= @audit.status_label %></li>
 <li><%= l(:label_submitted_on) %>: <%= format_time(audit.created_on) %></li>
 <li><%= l(:label_submitter) %>: <%= link_to_user(audit.user) %></li>
 <li><%= l(:label_revision) %>: <%= changeset.revision %></li>

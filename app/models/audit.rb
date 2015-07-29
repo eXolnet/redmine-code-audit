@@ -126,7 +126,7 @@ class Audit < ActiveRecord::Base
     if id_changed?
       Mailer.audit_created(self).deliver
     #elsif text_changed?
-      #Mailer.wiki_content_updated(self).deliver
+      #Mailer.audit_updated(self).deliver
     end
   end
 end

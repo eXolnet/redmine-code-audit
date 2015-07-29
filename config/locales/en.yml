@@ -31,6 +31,7 @@ en:
   notice_audit_successful_create: "Audit %{id} created."
   notice_audit_no_repository_configured: "You don't have any repository configured for this project."
   text_audit_added: "Audit %{id} has been created by %{author}."
+  text_audit_comment_added: "Audit %{id} has been commented by %{auditor}."
   status_: Not Applicable
   status_audit_not_required: Audit Not Required
   status_audit_required: Audit Required

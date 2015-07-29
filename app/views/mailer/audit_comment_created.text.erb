@@ -1,0 +1,4 @@
+<%= l(:text_audit_comment_added, :id => "##{@audit.id}", :auditor => h(@auditor)) %>
+
+----------------------------------------
+<%= render :partial => 'audit', :formats => [:text], :locals => { :audit => @audit, :audit_url => @audit_url, :changeset => @changeset, :repository => @repository } %>

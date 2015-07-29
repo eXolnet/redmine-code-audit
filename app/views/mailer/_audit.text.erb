@@ -1,6 +1,7 @@
 <%= "Audit ##{audit.id}: #{audit.summary}" %>
 <%= audit_url %>
 
+* <%= l(:label_status) %>: <%= @audit.status_label %>
 * <%= l(:label_submitted_on) %>: <%= format_time(audit.created_on) %>
 * <%= l(:label_submitter) %>: <%= audit.user %>
 * <%= l(:label_revision) %>: <%= changeset.revision %>
