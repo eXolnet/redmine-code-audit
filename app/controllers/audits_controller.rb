@@ -17,32 +17,8 @@ class AuditsController < ApplicationController
     sort_update(@query.sortable_columns)
     @query.sort_criteria = sort_criteria.to_a
 
-    logger.debug "Query: #{@query.inspect}"
-    logger.debug "Query is valid: #{@query.valid?}"
-
     if @query.valid?
       @project = Project.find(params[:project_id])
-
-      # sort_init 'updated_on', 'desc'
-      # sort_update 'revision' => "#{Changeset.table_name}.revision",
-      #             'summary' => "#{Audit.table_name}.summary",
-      #             'status' => "#{Audit.table_name}.status",
-      #             'committed_on' => "#{Changeset.table_name}.committed_on",
-      #             'updated_on' => "#{Audit.table_name}.updated_on"
-
-      # @query = @project.audits
-
-      # @limit = per_page_option
-      # @audit_count = @query.count
-      # @audit_pages = Paginator.new @audit_count, @limit, params['page']
-      # @offset ||= @audit_pages.offset
-
-      # @audits = @query
-      #   .includes(:changeset, :user)
-      #   .reorder(sort_clause)
-      #   .offset(@offset)
-      #   .limit(@limit)
-      #   .all
 
       @limit = per_page_option
       @audit_count = @query.audit_count
@@ -51,8 +27,6 @@ class AuditsController < ApplicationController
       @audits = @query.audits(:order => sort_clause,
                               :offset => @offset,
                               :limit => @limit)
-
-      logger.debug "Audits: #{@audits.inspect}"
 
       respond_to do |format|
         format.html { render :template => 'audits/index', :layout => !request.xhr? }
@@ -88,24 +62,13 @@ class AuditsController < ApplicationController
       return
     end
 
-    revision = params[:revision]
-
-    @audit = Audit.new(params[:audit])
+    @audit = Audit.new
     @audit.project = @project
     @audit.user = User.current
     @audit.status = Audit::STATUS_AUDIT_REQUESTED
-
-    unless revision.empty?
-      @audit.changeset = @project.repository.changesets.where("#{Changeset.table_name}.revision LIKE ?", "%#{revision}%").first
-    end
+    @audit.safe_attributes = params[:audit]
 
     if @audit.save
-      unless params[:auditors_user_ids].nil?
-          params[:auditors_user_ids].each do |value|
-          @audit.add_auditor(User.find(value))
-          end
-      end
-
       flash[:notice] = l(:notice_audit_successful_create, :id => view_context.link_to("##{@audit.id}", project_audit_path(@project, @audit)))
       redirect_to project_audit_path(@project, @audit)
       return
@@ -147,13 +110,11 @@ class AuditsController < ApplicationController
     end
 
     # Save comment
-    unless params[:audit_comment] && params[:audit_comment].empty?
-      @comment = AuditComment.new()
-      @comment.content = params[:audit_comment]
-      @comment.audit = @audit
-      @comment.user = User.current
-      @audit.comments << @comment
-    end
+    @comment = AuditComment.new()
+    @comment.content = params[:audit_comment]
+    @comment.audit = @audit
+    @comment.user = User.current
+    @audit.comments << @comment
 
     # Save inline comments
     unless params[:inline_comment].nil?
@@ -193,6 +154,10 @@ class AuditsController < ApplicationController
   def update
     @project = Project.find(params[:project_id])
     @audit = Audit.find(params[:id])
+
+    # Reset the auditor_user_ids to uncheck selected auditors that
+    # are not checked anymore
+    @audit.auditor_user_ids = []
 
     if @audit.update_attributes(params[:audit])
       flash[:notice] = l(:notice_successful_update)

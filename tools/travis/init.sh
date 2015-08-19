@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 if [[ ! "$WORKSPACE" = /* ]] ||
    [[ ! "$PATH_TO_PLUGIN" = /* ]] ||
@@ -9,26 +9,34 @@ then
   exit 1;
 fi
 
+if [ "$VERBOSE" = "yes" ]; then
+  TRACE=--trace
+fi
+
 case $REDMINE_VERSION in
-  1.4.*)  export PATH_TO_PLUGINS=./vendor/plugins # for redmine < 2.0
-          export GENERATE_SECRET=generate_session_store
-          export MIGRATE_PLUGINS=db:migrate_plugins
-          export REDMINE_TARBALL=https://github.com/redmine/redmine/archive/$REDMINE_VERSION.tar.gz
-          ;;
-  2.*)  export PATH_TO_PLUGINS=./plugins # for redmine 2.0
-          export GENERATE_SECRET=generate_secret_token
-          export MIGRATE_PLUGINS=redmine:plugins:migrate
-          export REDMINE_TARBALL=https://github.com/redmine/redmine/archive/$REDMINE_VERSION.tar.gz
-          ;;
-  master) export PATH_TO_PLUGINS=./plugins
-          export GENERATE_SECRET=generate_secret_token
-          export MIGRATE_PLUGINS=redmine:plugins:migrate
-          export REDMINE_GIT_REPO=https://github.com/redmine/redmine.git
-          export REDMINE_GIT_TAG=master
-          ;;
-  *)      echo "Unsupported platform $REDMINE_VERSION"
-          exit 1
-          ;;
+  1.4.*)
+    export PATH_TO_PLUGINS=./vendor/plugins # for redmine < 2.0
+    export GENERATE_SECRET=generate_session_store
+    export MIGRATE_PLUGINS=db:migrate_plugins
+    export REDMINE_TARBALL=https://github.com/redmine/redmine/archive/$REDMINE_VERSION.tar.gz
+    ;;
+  [2-3].*)
+    export PATH_TO_PLUGINS=./plugins # for redmine > 2.0
+    export GENERATE_SECRET=generate_secret_token
+    export MIGRATE_PLUGINS=redmine:plugins:migrate
+    export REDMINE_TARBALL=https://github.com/redmine/redmine/archive/$REDMINE_VERSION.tar.gz
+    ;;
+  master)
+    export PATH_TO_PLUGINS=./plugins
+    export GENERATE_SECRET=generate_secret_token
+    export MIGRATE_PLUGINS=redmine:plugins:migrate
+    export REDMINE_GIT_REPO=https://github.com/redmine/redmine.git
+    export REDMINE_GIT_TAG=master
+    ;;
+  *)
+    echo "Unsupported platform $REDMINE_VERSION"
+    exit 1
+    ;;
 esac
 
 export BUNDLE_GEMFILE=$PATH_TO_REDMINE/Gemfile
@@ -53,22 +61,18 @@ run_tests() {
   # exit if tests fail
   set -e
 
+  # cd to redmine folder
   cd $PATH_TO_REDMINE
 
-  if [ "$VERBOSE" = "yes" ]; then
-    TRACE=--trace
-  fi
-
-  script -e -c "bundle exec rake redmine:plugins:test NAME="$PLUGIN $VERBOSE
+  script -e -c "bundle exec rake $TRACE redmine:plugins:test NAME=$PLUGIN"
 }
 
 uninstall() {
   set -e # exit if migrate fails
+
+  # cd to redmine folder
   cd $PATH_TO_REDMINE
   # clean up database
-  if [ "$VERBOSE" = "yes" ]; then
-    TRACE=--trace
-  fi
   bundle exec rake $TRACE $MIGRATE_PLUGINS NAME=$PLUGIN VERSION=0
 }
 
@@ -83,10 +87,6 @@ run_install() {
   if [ -L "$PATH_TO_PLUGINS/$PLUGIN" ]; then rm "$PATH_TO_PLUGINS/$PLUGIN"; fi
   ln -s "$PATH_TO_PLUGIN" "$PATH_TO_PLUGINS/$PLUGIN"
 
-  if [ "$VERBOSE" = "yes" ]; then
-    export TRACE=--trace
-  fi
-
   PATH_TO_DATABASE_CONFIG_FILE=${PATH_TO_DATABASE_CONFIG_FILE:=tools/travis/database.yml}
 
   cp $PATH_TO_PLUGIN/$PATH_TO_DATABASE_CONFIG_FILE config/database.yml
@@ -95,10 +95,10 @@ run_install() {
   mkdir -p vendor/bundle
   bundle install --path vendor/bundle --without rmagick
 
-  bundle exec rake db:migrate $TRACE
-  bundle exec rake redmine:load_default_data REDMINE_LANG=en $TRACE
-  bundle exec rake $GENERATE_SECRET $TRACE
-  bundle exec rake $MIGRATE_PLUGINS $TRACE
+  bundle exec rake $TRACE db:migrate
+  bundle exec rake $TRACE redmine:load_default_data REDMINE_LANG=en
+  bundle exec rake $TRACE $GENERATE_SECRET
+  bundle exec rake $TRACE $MIGRATE_PLUGINS
 }
 
 while getopts :irtu opt

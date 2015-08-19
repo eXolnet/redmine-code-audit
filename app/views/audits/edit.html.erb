@@ -8,6 +8,8 @@
   <div class="box tabular">
     <div id="all_attributes">
       <%= labelled_fields_for :audit, @audit do |f| %>
+        <p><%= f.select :status, Audit::statuses.collect {|key, value| [value, key]}, {:required => true} %></p>
+
         <%= render :partial => 'form', :locals => { :f => f } %>
       <% end %>
     </div>

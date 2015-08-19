@@ -3,8 +3,7 @@
 <%= link_to l(:label_open_audits), project_audits_path(:utf8 => '✓',
                                                        :set_filter => 1,
                                                        :f => ['status'],
-                                                       :op => {:status => '!'},
-                                                       :v => {:status => ['closed']}) %><br/>
+                                                       :op => {:status => 'o'}) %><br/>
 
 <%= link_to l(:label_need_attention), project_audits_path(:utf8 => '✓',
                                                           :set_filter => 1,

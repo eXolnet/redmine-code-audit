@@ -66,7 +66,7 @@ class AuditQuery < Query
     # Misc
     add_available_filter "summary", :type => :text
     add_available_filter "status",
-      :type => :list, :values => Audit.statuses.collect{|value, name| [name, value] }
+      :type => :list_status, :values => Audit.statuses.collect{|value, name| [name, value] }
     add_available_filter "created_on", :type => :date_past
     add_available_filter "updated_on", :type => :date_past
   end
@@ -88,17 +88,31 @@ class AuditQuery < Query
   def audits(options={})
     order_option = [group_by_sort_order, options[:order]].flatten.reject(&:blank?)
 
-    audits = Audit.where(options[:conditions]).all(
-      :include => [:project, :changeset, :user],
-      :conditions => statement,
-      :order => order_option,
-      :joins => joins_for_order_statement(order_option.join(',')),
-      :limit  => options[:limit],
-      :offset => options[:offset]
-    )
+    audits = Audit
+      .joins(joins_for_order_statement(order_option.join(',')))
+      .eager_load([:project, :changeset, :user])
+      .where(options[:conditions])
+      .where(statement)
+      .order(order_option)
+      .limit(options[:limit])
+      .offset(options[:offset])
 
     audits
   rescue ::ActiveRecord::StatementInvalid => e
     raise StatementInvalid.new(e.message)
+  end
+
+  def sql_for_field(field, operator, value, db_table, db_field, is_custom_filter=false)
+    sql = ''
+    case operator
+    when "o"
+      sql = "#{queried_table_name}.status NOT IN ('#{Audit::STATUS_AUDIT_NOT_REQUIRED}', '#{Audit::STATUS_ACCEPTED}', '#{Audit::STATUS_RESIGNED}', '#{Audit::STATUS_CLOSED}')"
+    when "c"
+      sql = "#{queried_table_name}.status IN ('#{Audit::STATUS_AUDIT_NOT_REQUIRED}', '#{Audit::STATUS_ACCEPTED}', '#{Audit::STATUS_RESIGNED}', '#{Audit::STATUS_CLOSED}')"
+    else
+      sql = super
+    end
+
+    return sql
   end
 end

@@ -1,254 +1,351 @@
 var AuditHelper = {
+  side: {
+    left: 0,
+    right: 1,
+  },
+  // TODO: Load the changes as an object here instead of querying the DOM
+
+  // Returns the DOM diff table (lines + text) for a specified path
   table: function(path) {
-    var target_path = $.trim(path),
-      table = null;
-
-    $('.filecontent').each(function() {
-      var $this = $(this),
-        path = $.trim($this.find('.filename').text());
-
-      if (path == target_path) {
-        table = $this;
-      }
-    });
-
-    return table;
+    return typeof path === 'string' ? $('.filecontent[data-path="' + path + '"]').first() : path;
   },
 
+  // Returns the DOM row for a path and line number
   row: function(path, line_number) {
-    var $table = typeof path == 'string' ?  AuditHelper.table(path) : path,
-      $row = null;
+    var $table = AuditHelper.table(path)
 
-    $table
-      .find('.line-num:nth-child(3)')
-      .each(function() {
-        if ($(this).text() == line_number) {
-          $row = $(this).closest('tr');
-        }
-      });
-
-    return $row;
+    return $table.find('.line-num-right[data-line="' + line_number + '"]').first().parent();
   },
 
+  line: function(path, line_number, side) {
+    var $row = AuditHelper.row(path, line_number);
+    var left = side === AuditHelper.side.left;
+
+    return $row.find('.line-code.line-code-' + (left ? 'left' : 'right')).first();
+  },
+
+  // Returns the path associated to a diff table
   path: function(table) {
-    return $.trim(table.find('.filename').text());
+    return typeof table !== 'string' ? table.data('path') : table;
   },
 
   change_id: function(path) {
-    if (typeof path != 'string') {
-      path = AuditHelper.path(path);
+    var change_id = null;
+    path = AuditHelper.path(path);
+
+    var change = $('.list-audit-changes [data-path="' + path + '"]').first();
+
+    if (change) {
+      return change.data('change-id');
     }
-
-    change_id = null;
-
-    $('.list-audit-changes tbody tr').each(function() {
-      if ($(this).children('td:nth-child(4)').text() == path) {
-        change_id = $(this).attr('data-change-id');
-      }
-    });
 
     return change_id;
   }
 };
 
-$(document).ready(function() {
-  var nums = $('.line-num:nth-child(3)').filter(function() {
-    return ! isNaN(parseFloat($(this).text()));
+jQuery.fn.previousElement = function(selector) {
+  var currentElement = this;
+  var elements = $(selector);
+  if (elements.length === 0) {
+    return;
+  }
+
+  var previousElement = null;
+  elements.each(function(index, testedElement) {
+    testedElement = $(testedElement);
+    if (testedElement.is(currentElement)) {
+      var index = index > 0 ? index - 1 : elements.length - 1;
+      previousElement = elements[index];
+      return false;
+    }
   });
+  return $(previousElement);
+};
 
+jQuery.fn.nextElement = function(selector) {
+  var currentElement = this;
+  var elements = $(selector);
+  if (elements.length === 0) {
+    return;
+  }
 
-  var comment_line_begin,
+  var nextElement = null;
+  elements.each(function(index, testedElement) {
+    testedElement = $(testedElement);
+    if (testedElement.is(currentElement)) {
+      var index = index + 1 < elements.length ? index + 1 : 0;
+      nextElement = elements[index];
+      return false;
+    }
+  });
+  return $(nextElement);
+};
+
+$(document).ready(function() {
+  var hover_overlay,
+    comment_line_begin,
     comment_line_end,
     overlay,
-    comment_index = 0;
+    comment_index = 0,
+    writingInlineComment = false;
+
+  var inlineCommentsLinks = function() {
+    return '<span class="inline-comment-links">' +
+      '<a href="#" data-action="previous">Previous</a> · ' +
+      '<a href="#" data-action="next">Next</a> · ' +
+      '<a href="#" data-action="reply">Reply</a> · ' +
+      '<a href="#" data-action="edit">Edit</a> · ' +
+      '<a href="#" data-action="delete">Delete</a>' +
+    '</span>';
+  };
+
+  var draftComment = function(line_begin, line_end, comment) {
+    return '<div class="inline-comment inline-comment-draft" data-line-begin="' + line_begin + '" data-line-end="' + line_end + '">' +
+      '<div class="inline-comment-header">' +
+        '<span class="inline-comment-title">' + $('#comment_user_name').val() + ' (Draft)</span>' +
+        inlineCommentsLinks() +
+        '<span class="inline-comment-line">Line ' + line_begin + (line_begin != line_end ? '-'+line_end : '') + '</span>' +
+      '</div>' +
+      comment +
+    '</div>';
+  };
+
+  var existingComment = function(line_begin, line_end, title, comment) {
+    return '<div class="inline-comment" data-line-begin="' + line_begin + '" data-line-end="' + line_end + '">' +
+      '<div class="inline-comment-header">' +
+        '<span class="inline-comment-title">' + title + '</span>' +
+         inlineCommentsLinks() +
+        '<span class="inline-comment-line">Line ' + line_begin + (line_begin != line_end ? '-'+line_end : '') + '</span>' +
+      '</div>' +
+      comment +
+    '</div>';
+  };
+
+  var showCommentEditor = function(path, line_begin, line_end) {
+    if (writingInlineComment) {
+      return;
+    }
+    writingInlineComment = true;
+    var diff = AuditHelper.table(path);
+    var row = AuditHelper.row(path, line_end);
+    var change_id = AuditHelper.change_id(path);
+
+    // Add the comment box
+    var tr = $('<tr><th class="line-num line-num-left" /><td /><th class="line-num line-num-right" /><td class="line-comment" /></tr>');
+
+    tr.find('.line-comment')
+      .append('<textarea rows="4"></textarea><p class="buttons"><input type="button" class="cancel" value="Cancel"> <input type="button" class="done" value="Done"></p>');
+
+    var textarea = tr.find('textarea');
+
+    var wikiToolbar = new jsToolBar(textarea.get(0));
+    wikiToolbar.draw();
+
+    tr.find('.cancel').click(function() {
+      destroyOverlay(overlay);
+      tr.remove();
+      writingInlineComment = false;
+    });
+
+    tr.find('.done').click(function() {
+      var td = tr.find('.line-comment'),
+        comment = textarea.val();
+
+      writingInlineComment = false;
+      destroyOverlay(overlay);
+      td.empty();
+
+      // Do not allow the creation of empty comments
+      if (comment === '') {
+        return;
+      }
+
+      td.append(draftComment(line_begin, line_end, comment));
+
+      td.append('<input type="hidden" name="inline_comment[' + comment_index + '][line_begin]" value="' + line_begin + '" />');
+      td.append('<input type="hidden" name="inline_comment[' + comment_index + '][line_end]" value="' + line_end + '" />');
+      td.append('<input type="hidden" name="inline_comment[' + comment_index + '][change_id]" value="' + change_id + '" />');
+      td.append('<input type="hidden" name="inline_comment[' + comment_index + '][content]" value="' + comment + '" />');
+
+      comment_index += 1;
+      
+    });
+
+    row.after(tr);
+
+    textarea.focus();
+  };
+
+  var scrollTo = function(element) {
+    $(document.body).animate({
+      scrollTop: (element.offset().top - 10)
+    }, 500, 'easeInOutCubic');
+  };
+
+  var createOverlay = function(line) {
+    var overlay = $('<div class="audit-comment-overlay" />');
+
+    // Add the comment overlay
+    overlay
+      .css(line.offset())
+      .css({
+        width: line.outerWidth(),
+        height: line.outerHeight()
+      })
+      .appendTo('body');
+
+      return overlay;
+  };
+
+  var updateOverlay = function(overlay, line_begin, line_end) {
+    overlay
+      .css(line_begin.offset())
+      .css({
+        width: line_end.outerWidth(),
+        height: line_end.offset().top - line_begin.offset().top + line_end.outerHeight()
+      });
+  };
+
+  var destroyOverlay = function(overlay) {
+    if (overlay) {
+      overlay.remove();
+      overlay = null;
+    }
+  };
+
+  var nums = $('.line-num-right[data-line]');
 
   nums
     .each(function() {
       $(this).css('cursor', 'pointer');
     })
     .mousedown(function(e) {
+      if (writingInlineComment) {
+        return;
+      }
+
       var $this = $(this),
-        line = $this.next(),
-        offset = line.offset();
+        line = $this.next();
 
       e.preventDefault();
-
-      overlay = $('<div class="audit-comment-overlay" />');
 
       comment_line_begin = line;
       comment_line_end   = line;
 
-      // Add the comment overlay
-      overlay
-        .css(offset)
-        .css({
-          width: line.outerWidth(),
-          height: line.outerHeight()
-        })
-        .appendTo('body');
+      overlay = createOverlay(line);
 
       // Overlay manipulation
-      $this.closest('table')
-        .find('.line-num')
-        .filter(function() {
-          return ! isNaN(parseFloat($(this).text()));
-        })
-        .mouseenter(function() {
-          line2 = $(this).next(),
-          offset2 = line2.offset();
+      var items = $this.closest('table')
+        .find('.line-num.line-num-right[data-line]');
 
-          if (offset.top < offset2.top) {
-            overlay
-              .css(offset)
-              .css({
-                width: line.outerWidth(),
-                height: offset2.top - offset.top + line2.outerHeight()
-              });
 
+        items.mouseenter(function() {
+          var line2 = $(this).next();
+
+          if (line.prev().data('line') < line2.prev().data('line')) {
             comment_line_begin = line;
             comment_line_end   = line2;
           } else {
-            overlay
-              .css(offset2)
-              .css({
-                width: line.outerWidth(),
-                height: offset.top - offset2.top + line.outerHeight()
-              });
-
             comment_line_begin = line2;
             comment_line_end   = line;
           }
+
+          updateOverlay(overlay, comment_line_begin, comment_line_end);
         });
     })
     .mouseup(function() {
+      var $this = $(this);
+      var path = $this.closest('table').data('path');
       $('.line-num').unbind('mouseenter');
-
-      var row = comment_line_end.closest('tr');
-
-      // Add the comment box
-      var tr = $('<tr><th class="line-num" /><td class="line-comment" /><th class="line-num" /><td class="line-comment" /></tr>');
-
-      tr.find('td:nth-child(4)')
-        .append('<textarea rows="4"></textarea><p class="buttons"><input type="button" class="cancel" value="Cancel"> <input type="button" class="done" value="Done"></p>');
-
-      var textarea = tr.find('textarea');
-
-      var wikiToolbar = new jsToolBar(textarea.get(0));
-      wikiToolbar.draw();
-
-      tr.find('.cancel').click(function() {
-        overlay.remove();
-        tr.remove();
-      });
-
-      tr.find('.done').click(function() {
-        var td = tr.find('td:nth-child(4)'),
-          comment = textarea.val();
-
-        overlay.remove();
-        td.empty();
-
-        // On ne permet pas l'ajout de commentaires vides
-        if (comment == "") {
-          return;
-        }
-
-        var line_begin = comment_line_begin.prev().text(),
-          line_end   = comment_line_end.prev().text(),
-          change_id  = AuditHelper.change_id(row.closest('table'));
-
-        td.append('<div class="inline-comment inline-comment-draft" data-line-begin="' + line_begin + '" data-line-end="' + line_end + '">' +
-            '<div class="inline-comment-header">' +
-              '<span class="inline-comment-title">' + $('#comment_user_name').val() + ' (Draft)</span>' +
-              '<span class="inline-comment-line">Line ' + line_begin + (line_begin != line_end ? '-'+line_end : '') + '</span>' +
-            '</div>' +
-            comment +
-          '</div>');
-
-        td.append('<input type="hidden" name="inline_comment[' + comment_index + '][line_begin]" value="' + line_begin + '" />');
-        td.append('<input type="hidden" name="inline_comment[' + comment_index + '][line_end]" value="' + line_end + '" />');
-        td.append('<input type="hidden" name="inline_comment[' + comment_index + '][change_id]" value="' + change_id + '" />');
-        td.append('<input type="hidden" name="inline_comment[' + comment_index + '][content]" value="' + comment + '" />');
-
-        comment_index += 1;
-      });
-
-      row.after(tr);
-
-      textarea.focus();
+      showCommentEditor(path, comment_line_begin.prev().data('line'), comment_line_end.prev().data('line'));
     });
-
-
 
   $('.audit-change').click(function() {
     var $table = AuditHelper.table($(this).closest('td').next().text())
-    $(document.body).animate({scrollTop: ($table.offset().top - 10) }, 500,'easeInOutCubic');
+    scrollTo($table);
 
     return false;
   });
 
-  var hover_overlay;
-
   $(document).on('mouseover', '.inline-comment', function() {
+    if (writingInlineComment) {
+      return;
+    }
     var $this = $(this),
-      $table = $this.closest('table'),
-      $row_begin = AuditHelper.row($table, $this.attr('data-line-begin')),
-      $row_end = AuditHelper.row($table, $this.attr('data-line-end')),
-      $line_begin = $row_begin.find('td:nth-child(4)'),
-      $line_end= $row_end.find('td:nth-child(4)');
+      table = $this.closest('table'),
+      line_begin = AuditHelper.line(table, $this.data('line-begin'), AuditHelper.side.right),
+      line_end = AuditHelper.line(table, $this.data('line-end'), AuditHelper.side.right);
 
-    hover_overlay = $('<div class="audit-comment-overlay" />');
-
-    hover_overlay
-      .css($line_begin.offset())
-      .css({
-        width: $line_begin.outerWidth(),
-        height: $line_end.offset().top - $line_begin.offset().top + $line_end.outerHeight()
-      })
-      .appendTo('body');
+    destroyOverlay(hover_overlay);
+    hover_overlay = createOverlay(line_begin);
+    updateOverlay(hover_overlay, line_begin, line_end);
   });
 
   $(document).on('mouseout', '.inline-comment', function() {
-    if (hover_overlay) {
-      hover_overlay.remove();
-      hover_overlay = null;
-    }
+    destroyOverlay(hover_overlay);
   });
 
-
-  // Création des inline comments déjà créés
-  $('.inline-summary-content').each(function() {
+  // Create existing inline comments
+  // Insert in reverse because we append to the target line, which would make newer comment go on top of older one
+  // instead of the opposite (older at the top, newer at the bottom).
+  $.each($('.inline-summary-content').get().reverse(), function() {
     var $this = $(this),
-      path = $this.attr('data-path'),
+      path = $this.data('path'),
       audit_comment = $this.parents('.audit_comment'),
-      line_begin = $this.attr('data-line-begin'),
-      line_end = $this.attr('data-line-end') != "" ? $this.attr('data-line-end') : line_begin;
+      line_begin = $this.data('line-begin'),
+      line_end = $this.data('line-end') !== '' ? $this.data('line-end') : line_begin;
 
     var $row = AuditHelper.row(path, line_end);
 
-    var tr = $('<tr><th class="line-num" /><td class="line-comment" /><th class="line-num" /><td class="line-comment" /></tr>'),
-      td = tr.find('td:nth-child(4)');
+    var tr = $('<tr><th class="line-num line-num-left" /><td /><th class="line-num line-num-right" /><td class="line-comment" /></tr>'),
+      td = tr.find('.line-comment');
 
-    td.append('<div class="inline-comment" data-line-begin="' + line_begin + '" data-line-end="' + line_end + '">' +
-            '<div class="inline-comment-header">' +
-              '<span class="inline-comment-title">' + audit_comment.find('.title').html() + '</span>' +
-              '<span class="inline-comment-line">Line ' + line_begin + (line_begin != line_end ? '-'+line_end : '') + '</span>' +
-            '</div>' +
-            $this.html() +
-          '</div>');
+    td.append(existingComment(line_begin, line_end, audit_comment.find('.title').html(), $this.html()));
 
     $row.after(tr);
   });
 
-
+  // Scrolls to the diff
   $('.inline-line-number').click(function() {
     var $this = $(this),
-      path = $this.attr('data-path'),
-      line = $this.attr('data-line');
+      path = $this.data('path'),
+      line = $this.data('line');
 
     var $row = AuditHelper.row(path, line);
-    $(document.body).animate({scrollTop: ($row.offset().top - 10) }, 500,'easeInOutCubic');
+    scrollTo($row);
 
     return false;
+  });
+
+  $(document).on('click', '.inline-comment-links [data-action="previous"]', function(e) {
+    e.preventDefault();
+    var $this = $(this);
+    var previousComment = $this.closest('.inline-comment').previousElement('.inline-comment');
+    scrollTo(previousComment);
+  });
+
+  $(document).on('click', '.inline-comment-links [data-action="next"]', function(e) {
+    e.preventDefault();
+    var $this = $(this);
+    var nextComment = $this.closest('.inline-comment').nextElement('.inline-comment');
+    scrollTo(nextComment);
+  });
+
+  $(document).on('click', '.inline-comment-links [data-action="reply"]', function(e) {
+    e.preventDefault();
+    var $this = $(this);
+    var targetComment = $this.closest('.inline-comment');
+    var path = targetComment.closest('.filecontent').data('path');
+    var line_begin = targetComment.data('line-begin');
+    var line_end = targetComment.data('line-end');
+    showCommentEditor(path, line_begin, line_end);
+  });
+
+  $(document).on('click', '.inline-comment-links [data-action="edit"]', function(e) {
+
+  });
+
+  $(document).on('click', '.inline-comment-links [data-action="delete"]', function(e) {
+
   });
 });
