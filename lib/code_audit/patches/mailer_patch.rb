@@ -18,7 +18,7 @@ module CodeAudit
         @author = audit.author
         @changeset = audit.changeset
         @repository = @changeset.repository
-        @audit_url = project_audit_path(@project, @audit)
+        @audit_url = url_for(:controller => 'audits', :action => 'show', :project => @project, :id => @audit)
         recipients = audit.recipients
         cc = audit.watcher_recipients - recipients
 
